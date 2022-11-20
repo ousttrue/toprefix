@@ -18,6 +18,7 @@ PREFIX = HOME / "prefix"
 PREFIX_SRC = HOME / "prefix_work/src"
 GNOME_SOURCE_URL = "https://download.gnome.org/sources/{name}/{major}.{minor}/{name}-{major}.{minor}.{patch}.tar.xz"
 GITHUB_URL = "https://github.com/{user}/{name}.git"
+GITLAB_URL = "https://gitlab.freedesktop.org/{user}/{name}.git"
 
 
 def gnome_url(name: str, major: int, minor: int, patch: int) -> str:
@@ -85,56 +86,71 @@ class MesonPkg(NamedTuple):
         basename = os.path.basename(url)
         if basename.endswith(".tar.xz"):
             stem = basename[0:-7]
+        elif basename.endswith(".tar.bz2"):
+            stem = basename[0:-8]
         # expect
         # {stem}-{version}{extension}
-        m = re.match(r"^(.*)-(\d+)\.(\d+)\.(\d+)$", stem)
+        m = re.match(r"^(.*)-(\d+)\.(\d+)(\.\d+)?$", stem)
         if m:
             name = m.group(1)
             major = m.group(2)
             minor = m.group(3)
             patch = m.group(4)
+            if not patch:
+                patch = ""
         else:
             print(stem)
 
         return MesonPkg(
-                name,
-                f"{major}.{minor}.{patch}",
-                url,
-                )
+            name,
+            f"{major}.{minor}{patch}",
+            url,
+        )
 
     @staticmethod
     def from_github(user: str, name: str) -> "MesonPkg":
         return MesonPkg(
-                name,
-                "github",
-                GITHUB_URL.format(user=user, name=name),
-                )
+            name,
+            "git",
+            GITHUB_URL.format(user=user, name=name),
+        )
+
+    @staticmethod
+    def from_gitlab(user: str, name: str) -> "MesonPkg":
+        return MesonPkg(
+            name,
+            "git",
+            GITLAB_URL.format(user=user, name=name),
+        )
 
     def __str__(self) -> str:
         return f"{self.name}-{self.version}"
 
     def get_download_dst(self, src: pathlib.Path) -> pathlib.Path:
-        if self.version!='github':
+        if self.version != "git":
             return src / os.path.basename(self.url)
 
     def get_clone_dst(self, src: pathlib.Path) -> pathlib.Path:
-        if self.version=='github':
+        if self.version == "git":
             return src / self.name
 
     def get_extract_dst(self, src: pathlib.Path) -> pathlib.Path:
         basename = os.path.basename(self.url)
         if basename.endswith(".tar.xz"):
             return src / basename[0:-7]
-        raise NotImplementedError(basename)
+        elif basename.endswith(".tar.bz2"):
+            return src / basename[0:-8]
+        else:
+            raise NotImplementedError(basename)
 
     def configure(
-            self,
-            source_dir: pathlib.Path,
-            prefix: pathlib.Path,
-            *,
-            clean: bool,
-            reconfigure: bool,
-            ):
+        self,
+        source_dir: pathlib.Path,
+        prefix: pathlib.Path,
+        *,
+        clean: bool,
+        reconfigure: bool,
+    ):
         LOGGER.info(f"configure: {source_dir} => {prefix}")
         with pushd(source_dir):
             if not (source_dir / "build").exists():
@@ -145,9 +161,9 @@ class MesonPkg(NamedTuple):
                     run(f"meson setup build --prefix {prefix}", env=make_env(prefix))
                 elif reconfigure:
                     run(
-                            f"meson setup build --prefix {prefix} --reconfigure",
-                            env=make_env(prefix),
-                            )
+                        f"meson setup build --prefix {prefix} --reconfigure",
+                        env=make_env(prefix),
+                    )
 
     def build(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         LOGGER.info(f"build: {source_dir} => {prefix}")
@@ -161,12 +177,19 @@ class MesonPkg(NamedTuple):
 
 
 PKGS = [
-        MesonPkg.from_url(gnome_url("glib", 2, 75, 0)),
-        MesonPkg.from_url(gnome_url("gtk", 4, 8, 2)),
-        MesonPkg.from_url(gnome_url("pygobject", 3, 42, 0)),
-        MesonPkg.from_github("wizbright", "waybox"),
-        MesonPkg.from_github("labwc", "labwc"),
-        ]
+    MesonPkg.from_url(gnome_url("glib", 2, 75, 0)),
+    MesonPkg.from_url(gnome_url("gtk", 4, 8, 2)),
+    MesonPkg.from_url(gnome_url("pygobject", 3, 42, 0)),
+    MesonPkg.from_github("wizbright", "waybox"),
+    MesonPkg.from_github("labwc", "labwc"),
+    MesonPkg.from_url(
+        "https://gitlab.freedesktop.org/mesa/drm/-/archive/libdrm-2.4.114/drm-libdrm-2.4.114.tar.bz2"
+    ),
+    # TODO: move prefix/share/pkgconfig/wayland-protocols.pc to lib64/pkgconfig
+    MesonPkg.from_url(
+        "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.29/wayland-protocols-1.29.tar.bz2"
+    ),
+]
 
 
 def list_pkgs():
@@ -211,8 +234,8 @@ def process(pkg: MesonPkg, *, clean: bool, reconfigure: bool):
 
 def main():
     parser = argparse.ArgumentParser(
-            prog="toprefix", description="Build automation to prefix"
-            )
+        prog="toprefix", description="Build automation to prefix"
+    )
     subparsers = parser.add_subparsers(dest="subparser_name")
 
     parser_list = subparsers.add_parser("list")
