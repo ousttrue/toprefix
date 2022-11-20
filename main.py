@@ -67,16 +67,33 @@ class MesonPkg(NamedTuple):
             return src / basename[0:-7]
         raise NotImplementedError(basename)
 
+    def make_env(self) -> dict:
+        env = {k: v for k, v in os.environ.items()}
+        env["PKG_CONFIG_PATH"] = prefix / "lib/pkgconfig"
+
+    def configure(self, source_dir: pathlib.Path, prefix: pathlib.Path):
+        if (source_dir / 'build').exists():
+            return
+        cwd = os.getcwd()
+        try:
+            os.chdir(source_dir)
+            run(f"meson setup build --prefix {prefix}", env=self.make_env())
+        finally:
+            os.chdir(cwd)
+
     def build(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         cwd = os.getcwd()
         try:
             os.chdir(source_dir)
-            env = {k: v for k, v in os.environ.items()}
-            env["PKG_CONFIG_PATH"] = prefix / "lib/pkgconfig"
-            # configure
-            run(f"meson setup build --prefix {prefix}", env=env)
-            # compile & install
-            run(f"meson install -C build", env=env)
+            run(f"meson compile -C build", env=self.make_env())
+        finally:
+            os.chdir(cwd)
+
+    def install(self, source_dir: pathlib.Path, prefix: pathlib.Path):
+        cwd = os.getcwd()
+        try:
+            os.chdir(source_dir)
+            run(f"meson install -C build", env=self.make_env())
         finally:
             os.chdir(cwd)
 
@@ -108,11 +125,12 @@ def process(pkg: MesonPkg):
         do_extract(download, extract)
 
     # patch
+    # TODO: master => main
 
     # build
+    pkg.configure(extract, PREFIX)
     pkg.build(extract, PREFIX)
-
-    # install
+    pkg.install(extract, PREFIX)
 
 
 def main():
