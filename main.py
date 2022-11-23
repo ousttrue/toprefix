@@ -20,6 +20,7 @@ GNOME_SOURCE_URL = "https://download.gnome.org/sources/{name}/{major}.{minor}/{n
 GITHUB_URL = "https://github.com/{user}/{name}.git"
 GITHUB_TAG_URL = "https://github.com/{user}/{name}/archive/refs/tags/{tag}.tar.gz"
 GITLAB_URL = "https://gitlab.freedesktop.org/{user}/{name}.git"
+CODEBERG_TAG_URL = "https://codeberg.org/{user}/{name}/archive/{tag}.tar.gz"
 
 
 def gnome_url(name: str, major: int, minor: int, patch: int) -> str:
@@ -134,6 +135,17 @@ class MesonPkg:
         )
 
     @staticmethod
+    def from_codeberg_tag(
+        user: str, name: str, tag: str, archive_name: str
+    ) -> "MesonPkg":
+        return MesonPkg(
+            name,
+            tag,
+            CODEBERG_TAG_URL.format(user=user, name=name, tag=tag),
+            archive_name=archive_name,
+        )
+
+    @staticmethod
     def from_gitlab(user: str, name: str) -> "MesonPkg":
         return MesonPkg(
             name,
@@ -229,6 +241,16 @@ PKGS = [
     MesonPkg.from_github_tag(
         "MusicPlayerDaemon", "MPD", "v0.23.10", archive_name="MPD-0.23.10.tar.gz"
     ),
+    MesonPkg.from_codeberg_tag(
+        "dnkl",
+        "foot",
+        "1.13.1",
+        archive_name="foot.tar.gz",
+    ),
+    MesonPkg.from_url(
+        "https://github.com/harfbuzz/harfbuzz/releases/download/5.3.1/harfbuzz-5.3.1.tar.xz"
+    ),
+    MesonPkg.from_codeberg_tag("dnkl", "tllist", "1.1.0", archive_name="tllist.tar.gz"),
 ]
 
 
