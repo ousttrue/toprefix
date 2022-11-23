@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from typing import NamedTuple, Optional
 import argparse
 import pathlib
 import os
@@ -9,7 +10,6 @@ import subprocess
 from contextlib import contextmanager
 import re
 from tqdm import tqdm
-from typing import NamedTuple
 
 LOGGER = logging.getLogger(__name__)
 
@@ -18,6 +18,7 @@ PREFIX = HOME / "prefix"
 PREFIX_SRC = HOME / "prefix_work/src"
 GNOME_SOURCE_URL = "https://download.gnome.org/sources/{name}/{major}.{minor}/{name}-{major}.{minor}.{patch}.tar.xz"
 GITHUB_URL = "https://github.com/{user}/{name}.git"
+GITHUB_TAG_URL = "https://github.com/{user}/{name}/archive/refs/tags/{tag}.tar.gz"
 GITLAB_URL = "https://gitlab.freedesktop.org/{user}/{name}.git"
 
 
@@ -76,10 +77,16 @@ def pushd(path: pathlib.Path):
         os.chdir(cwd)
 
 
-class MesonPkg(NamedTuple):
-    name: str
-    version: str
-    url: str
+class MesonPkg:
+    def __init__(
+        self, name: str, version: str, url: str, *, archive_name: Optional[str] = None
+    ):
+        self.name = name
+        self.version = version
+        self.url = url
+        self.archive_name = archive_name
+        if not self.archive_name:
+            self.archive_name = os.path.basename(self.url)
 
     @staticmethod
     def from_url(url: str) -> "MesonPkg":
@@ -116,6 +123,17 @@ class MesonPkg(NamedTuple):
         )
 
     @staticmethod
+    def from_github_tag(
+        user: str, name: str, tag: str, archive_name: str
+    ) -> "MesonPkg":
+        return MesonPkg(
+            name,
+            tag,
+            GITHUB_TAG_URL.format(user=user, name=name, tag=tag),
+            archive_name=archive_name,
+        )
+
+    @staticmethod
     def from_gitlab(user: str, name: str) -> "MesonPkg":
         return MesonPkg(
             name,
@@ -126,22 +144,41 @@ class MesonPkg(NamedTuple):
     def __str__(self) -> str:
         return f"{self.name}-{self.version}"
 
-    def get_download_dst(self, src: pathlib.Path) -> pathlib.Path:
+    def download_extract_or_clone(self, src: pathlib.Path) -> Optional[pathlib.Path]:
         if self.version != "git":
-            return src / os.path.basename(self.url)
+            download = src / self.archive_name
+            if not download.exists():
+                LOGGER.info(f"download: {download}")
+                do_download(self.url, download)
+
+            # extract
+            extract = self.get_extract_dst(PREFIX_SRC)
+            if not extract.exists():
+                LOGGER.info(f"extract: {extract}")
+                do_extract(download, extract)
+
+            return extract
+
+        clone = self.get_clone_dst(PREFIX_SRC)
+        if clone:
+            if not clone.exists():
+                LOGGER.info(f"clone: {clone}")
+                do_clone(self.url, clone)
+            return clone
 
     def get_clone_dst(self, src: pathlib.Path) -> pathlib.Path:
         if self.version == "git":
             return src / self.name
 
     def get_extract_dst(self, src: pathlib.Path) -> pathlib.Path:
-        basename = os.path.basename(self.url)
-        if basename.endswith(".tar.xz"):
-            return src / basename[0:-7]
-        elif basename.endswith(".tar.bz2"):
-            return src / basename[0:-8]
+        if self.archive_name.endswith(".tar.xz"):
+            return src / self.archive_name[0:-7]
+        elif self.archive_name.endswith(".tar.gz"):
+            return src / self.archive_name[0:-7]
+        elif self.archive_name.endswith(".tar.bz2"):
+            return src / self.archive_name[0:-8]
         else:
-            raise NotImplementedError(basename)
+            raise NotImplementedError(self.archive_name)
 
     def configure(
         self,
@@ -189,6 +226,9 @@ PKGS = [
     MesonPkg.from_url(
         "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.29/wayland-protocols-1.29.tar.bz2"
     ),
+    MesonPkg.from_github_tag(
+        "MusicPlayerDaemon", "MPD", "v0.23.10", archive_name="MPD-0.23.10.tar.gz"
+    ),
 ]
 
 
@@ -204,24 +244,7 @@ def get_pkg(name: str):
 
 
 def process(pkg: MesonPkg, *, clean: bool, reconfigure: bool):
-    download = pkg.get_download_dst(PREFIX_SRC)
-    if download:
-        if not download.exists():
-            LOGGER.info(f"download: {download}")
-            do_download(pkg.url, download)
-
-        # extract
-        extract = pkg.get_extract_dst(PREFIX_SRC)
-        if not extract.exists():
-            LOGGER.info(f"extract: {extract}")
-            do_extract(download, extract)
-
-    clone = pkg.get_clone_dst(PREFIX_SRC)
-    if clone:
-        if not clone.exists():
-            LOGGER.info(f"clone: {clone}")
-            do_clone(pkg.url, clone)
-        extract = clone
+    extract = pkg.download_extract_or_clone(PREFIX_SRC)
 
     # patch
     # TODO: master => main
