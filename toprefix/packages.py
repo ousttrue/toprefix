@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-from typing import NamedTuple, Optional
-import argparse
+from typing import Optional
 import pathlib
 import os
 import requests
@@ -13,9 +12,6 @@ from tqdm import tqdm
 
 LOGGER = logging.getLogger(__name__)
 
-HOME = pathlib.Path(os.environ["HOME"])
-PREFIX = HOME / "prefix"
-PREFIX_SRC = HOME / "prefix_work/src"
 GNOME_SOURCE_URL = "https://download.gnome.org/sources/{name}/{major}.{minor}/{name}-{major}.{minor}.{patch}.tar.xz"
 GITHUB_URL = "https://github.com/{user}/{name}.git"
 GITHUB_TAG_URL = "https://github.com/{user}/{name}/archive/refs/tags/{tag}.tar.gz"
@@ -62,7 +58,7 @@ def do_clone(url: str, dst: pathlib.Path):
 
 def make_env(prefix: pathlib.Path) -> dict:
     env = {k: v for k, v in os.environ.items()}
-    env["PKG_CONFIG_PATH"] = prefix / "lib64/pkgconfig"
+    env["PKG_CONFIG_PATH"] = str(prefix / "lib64/pkgconfig")
     return env
 
 
@@ -85,9 +81,10 @@ class MesonPkg:
         self.name = name
         self.version = version
         self.url = url
+        if not archive_name:
+            archive_name = os.path.basename(self.url)
+            assert archive_name
         self.archive_name = archive_name
-        if not self.archive_name:
-            self.archive_name = os.path.basename(self.url)
 
     @staticmethod
     def from_url(url: str) -> "MesonPkg":
@@ -96,19 +93,21 @@ class MesonPkg:
             stem = basename[0:-7]
         elif basename.endswith(".tar.bz2"):
             stem = basename[0:-8]
+        else:
+            raise NotImplementedError(url)
+
         # expect
         # {stem}-{version}{extension}
         m = re.match(r"^(.*)-(\d+)\.(\d+)(\.\d+)?$", stem)
-        if m:
-            name = m.group(1)
-            major = m.group(2)
-            minor = m.group(3)
-            patch = m.group(4)
-            if not patch:
-                patch = ""
-        else:
-            print(stem)
+        if not m:
+            raise NotImplementedError(stem)
 
+        name = m.group(1)
+        major = m.group(2)
+        minor = m.group(3)
+        patch = m.group(4)
+        if not patch:
+            patch = ""
         return MesonPkg(
             name,
             f"{major}.{minor}{patch}",
@@ -164,21 +163,21 @@ class MesonPkg:
                 do_download(self.url, download)
 
             # extract
-            extract = self.get_extract_dst(PREFIX_SRC)
+            extract = self.get_extract_dst(src)
             if not extract.exists():
                 LOGGER.info(f"extract: {extract}")
                 do_extract(download, extract)
 
             return extract
 
-        clone = self.get_clone_dst(PREFIX_SRC)
+        clone = self.get_clone_dst(src)
         if clone:
             if not clone.exists():
                 LOGGER.info(f"clone: {clone}")
                 do_clone(self.url, clone)
             return clone
 
-    def get_clone_dst(self, src: pathlib.Path) -> pathlib.Path:
+    def get_clone_dst(self, src: pathlib.Path) -> Optional[pathlib.Path]:
         if self.version == "git":
             return src / self.name
 
@@ -252,60 +251,3 @@ PKGS = [
     ),
     MesonPkg.from_codeberg_tag("dnkl", "tllist", "1.1.0", archive_name="tllist.tar.gz"),
 ]
-
-
-def list_pkgs():
-    for pkg in PKGS:
-        print(pkg)
-
-
-def get_pkg(name: str):
-    for pkg in PKGS:
-        if pkg.name == name:
-            return pkg
-
-
-def process(pkg: MesonPkg, *, clean: bool, reconfigure: bool):
-    extract = pkg.download_extract_or_clone(PREFIX_SRC)
-
-    # patch
-    # TODO: master => main
-
-    # build
-    pkg.configure(extract, PREFIX, clean=clean, reconfigure=reconfigure)
-    pkg.build(extract, PREFIX)
-    pkg.install(extract, PREFIX)
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        prog="toprefix", description="Build automation to prefix"
-    )
-    subparsers = parser.add_subparsers(dest="subparser_name")
-
-    parser_list = subparsers.add_parser("list")
-
-    parser_build = subparsers.add_parser("install")
-    parser_build.add_argument("package")
-    parser_build.add_argument("--clean", action=argparse.BooleanOptionalAction)
-    parser_build.add_argument("--reconfigure", action=argparse.BooleanOptionalAction)
-
-    args = parser.parse_args()
-
-    match args.subparser_name:
-        case "list":
-            LOGGER.info("list")
-            list_pkgs()
-
-        case "install":
-            pkg = get_pkg(args.package)
-            LOGGER.info(f"install: {pkg}")
-            process(pkg, clean=args.clean, reconfigure=args.reconfigure)
-
-        case _:
-            parser.print_help()
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    main()
