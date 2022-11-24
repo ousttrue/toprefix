@@ -1,19 +1,30 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = [
+    "setuptools",
+    "setuptools_scm[toml] >= 3.5.0",
+    #
+]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "toprefix/_version.py"
 
 [project]
 name = "toprefix"
 description = "Build automation to prefix."
-requires-python = ">=3.7"
 keywords = []
 license = { text = "BSD 3-Clause License" }
-classifiers = ["Programming Language :: Python :: 3"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    #
+]
+requires-python = ">=3.10"
 dependencies = ["meson", "tqdm"]
-dynamic = ["version", "readme"]
+dynamic = ["version"]
 
 [project.scripts]
 toprefix = "toprefix.__main__:main"
 
-[tool.setuptools.dynamic]
-readme = { file = "README.md" }
+[tool.readmd]
+file = "README.md"

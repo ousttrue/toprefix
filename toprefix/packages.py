@@ -223,6 +223,21 @@ class MesonPkg:
         with pushd(source_dir):
             run(f"meson install -C build", env=make_env(prefix))
 
+    def process(
+        self, *, src: pathlib.Path, prefix: pathlib.Path, clean: bool, reconfigure: bool
+    ):
+        LOGGER.info(f"install: {self}")
+        extract = self.download_extract_or_clone(src)
+        assert extract
+
+        # patch
+        # TODO: master => main
+
+        # build
+        self.configure(extract, prefix, clean=clean, reconfigure=reconfigure)
+        self.build(extract, prefix)
+        self.install(extract, prefix)
+
 
 PKGS = [
     MesonPkg.from_url(gnome_url("glib", 2, 75, 0)),
@@ -251,3 +266,14 @@ PKGS = [
     ),
     MesonPkg.from_codeberg_tag("dnkl", "tllist", "1.1.0", archive_name="tllist.tar.gz"),
 ]
+
+
+def list_pkgs():
+    for pkg in PKGS:
+        print(pkg)
+
+
+def get_pkg(name: str) -> Optional[MesonPkg]:
+    for pkg in PKGS:
+        if pkg.name == name:
+            return pkg
