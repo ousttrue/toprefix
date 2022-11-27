@@ -1,5 +1,5 @@
 from typing import Optional, List
-from .package import Pkg, MesonPkg, CMakePkg
+from .package import Pkg, MesonPkg, CMakePkg, PrebuiltPkg
 from .package.source import Archive, GitRepository
 
 PKGS: List[Pkg] = [
@@ -40,7 +40,9 @@ PKGS: List[Pkg] = [
     MesonPkg(
         Archive.codeberg_tag("dnkl", "tllist", "1.1.0", archive_name="tllist.tar.gz")
     ),
+    PrebuiltPkg(Archive.from_url('https://go.dev/dl/go1.19.3.linux-amd64.tar.gz'))
 ]
+
 
 
 def list_pkgs():

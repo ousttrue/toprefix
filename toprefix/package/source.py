@@ -6,6 +6,7 @@ import shutil
 import logging
 import requests
 import tqdm
+import tempfile
 from . import pkg
 
 LOGGER = logging.getLogger(__name__)
@@ -47,6 +48,8 @@ class Archive(Source):
         basename = os.path.basename(url)
         if basename.endswith(".tar.xz"):
             stem = basename[0:-7]
+        elif basename.endswith(".tar.gz"):
+            stem = basename[0:-7]
         elif basename.endswith(".tar.bz2"):
             stem = basename[0:-8]
         else:
@@ -55,20 +58,36 @@ class Archive(Source):
         # expect
         # {stem}-{version}{extension}
         m = re.match(r"^(.*)-(\d+)\.(\d+)(\.\d+)?$", stem)
-        if not m:
-            raise NotImplementedError(stem)
+        if m:
+            name = m.group(1)
+            major = m.group(2)
+            minor = m.group(3)
+            patch = m.group(4)
+            if not patch:
+                patch = ""
+            return Archive(
+                name,
+                f"{major}.{minor}{patch}",
+                url,
+            )
 
-        name = m.group(1)
-        major = m.group(2)
-        minor = m.group(3)
-        patch = m.group(4)
-        if not patch:
-            patch = ""
-        return Archive(
-            name,
-            f"{major}.{minor}{patch}",
-            url,
-        )
+        # expect
+        # go1.19.3.linux-amd64.tar.gz
+        m = re.match(r"^(.*)(\d+)\.(\d+)(\.\d+)\.linux-amd64$", stem)
+        if m:
+            name = m.group(1)
+            major = m.group(2)
+            minor = m.group(3)
+            patch = m.group(4)
+            if not patch:
+                patch = ""
+            return Archive(
+                name,
+                f"{major}.{minor}{patch}",
+                url,
+            )      
+
+        raise NotImplementedError(stem)
 
     @staticmethod
     def gnome(name: str, major, minor, patch) -> "Archive":
@@ -102,8 +121,23 @@ class Archive(Source):
 
         extract = self.get_extract_dst(src)
         if not extract.exists():
-            LOGGER.info(f"extract: {extract}")
-            self.do_extract(download, extract)
+            with tempfile.TemporaryDirectory() as dname:
+                dst = pathlib.Path(dname)
+                with pkg.pushd(dst):
+                    shutil.unpack_archive(download)
+
+                    # check result
+                    items = [f for f in dst.iterdir()]
+                    if len(items)!=1:
+                        raise Exception(f'extrac many root: {items}')
+
+                    # move to dst
+                    shutil.move(items[0], extract)
+
+            print(os.path.exists(dname))     # False
+
+            # LOGGER.info(f"extract: {extract}")
+            # self.do_extract(download, extract)
 
         return extract
 
@@ -122,10 +156,6 @@ class Archive(Source):
                 file.write(chunk)
                 pbar.update(len(chunk))
             pbar.close()
-
-    def do_extract(self, archive: pathlib.Path, dst: pathlib.Path):
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.unpack_archive(archive, dst.parent)
 
     def get_extract_dst(self, src: pathlib.Path) -> pathlib.Path:
         if self.archive_name.endswith(".tar.xz"):
