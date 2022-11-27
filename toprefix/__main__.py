@@ -9,7 +9,7 @@ from . import _version
 LOGGER = logging.getLogger(__name__)
 HOME = pathlib.Path(os.environ["HOME"])
 PREFIX = HOME / "prefix"
-PREFIX_SRC = HOME / "prefix_work/src"
+PREFIX_SRC = HOME / "local/src"
 
 
 def main():

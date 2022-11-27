@@ -1,4 +1,4 @@
-from typing import Protocol, Optional
+from typing import Protocol, Optional, Tuple
 import pathlib
 import os
 import re
@@ -28,16 +28,28 @@ class Source(Protocol):
         ...
 
 
+def archive_ext(src: str) -> Tuple[str, str]:
+    if src.endswith(".tar.xz"):
+        return src[0:-7], ".tar.xz"
+    elif src.endswith(".tar.gz"):
+        return src[0:-7], ".tar.gz"
+    elif src.endswith(".tar.bz2"):
+        return src[0:-8], ".tar.bz2"
+    elif src.endswith(".zip"):
+        return src[0:-4], ".zip"
+    else:
+        raise NotImplementedError(src)
+
+
 class Archive(Source):
     def __init__(
-        self, name: str, version: str, url: str, *, archive_name: Optional[str] = None
+        self, name: str, version: str, url: str, archive_name: Optional[str] = None
     ) -> None:
         self.name = name
         self.version = version
         self.url = url
         if not archive_name:
             archive_name = os.path.basename(self.url)
-            assert archive_name
         self.archive_name = archive_name
 
     def __str__(self) -> str:
@@ -46,16 +58,8 @@ class Archive(Source):
     @staticmethod
     def from_url(url: str) -> "Archive":
         basename = os.path.basename(url)
-        if basename.endswith(".tar.xz"):
-            stem = basename[0:-7]
-        elif basename.endswith(".tar.gz"):
-            stem = basename[0:-7]
-        elif basename.endswith(".tar.bz2"):
-            stem = basename[0:-8]
-        else:
-            raise NotImplementedError(url)
+        stem, _ = archive_ext(basename)
 
-        # expect
         # {stem}-{version}{extension}
         m = re.match(r"^(.*)-(\d+)\.(\d+)(\.\d+)?$", stem)
         if m:
@@ -71,7 +75,6 @@ class Archive(Source):
                 url,
             )
 
-        # expect
         # go1.19.3.linux-amd64.tar.gz
         m = re.match(r"^(.*)(\d+)\.(\d+)(\.\d+)\.linux-amd64$", stem)
         if m:
@@ -85,7 +88,18 @@ class Archive(Source):
                 name,
                 f"{major}.{minor}{patch}",
                 url,
-            )      
+            )
+
+        # releases/download/v1.3.0/ghq_linux_amd64.zip
+        m = re.search(r"/releases/download/([^/]+)/ghq_linux_amd64\.zip$", url)
+        if m:
+            name = "ghq"
+            version = m.group(1)
+            return Archive(
+                name,
+                version,
+                url,
+            )
 
         raise NotImplementedError(stem)
 
@@ -96,21 +110,20 @@ class Archive(Source):
         )
 
     @staticmethod
-    def github_tag(user: str, name: str, tag: str, archive_name: str) -> "Archive":
+    def github_tag(user: str, name: str, tag: str) -> "Archive":
         return Archive(
             name,
             tag,
             GITHUB_TAG_URL.format(user=user, name=name, tag=tag),
-            archive_name=archive_name,
+            f"{name}-{tag}.tar.gz",
         )
 
     @staticmethod
-    def codeberg_tag(user: str, name: str, tag: str, archive_name: str) -> "Archive":
+    def codeberg_tag(user: str, name: str, tag: str) -> "Archive":
         return Archive(
             name,
             tag,
             CODEBERG_TAG_URL.format(user=user, name=name, tag=tag),
-            archive_name=archive_name,
         )
 
     def extract(self, src: pathlib.Path) -> Optional[pathlib.Path]:
@@ -119,7 +132,8 @@ class Archive(Source):
             LOGGER.info(f"download: {download}")
             self.do_download(self.url, download)
 
-        extract = self.get_extract_dst(src)
+        stem, _ = archive_ext(self.archive_name)
+        extract = src / stem
         if not extract.exists():
             with tempfile.TemporaryDirectory() as dname:
                 dst = pathlib.Path(dname)
@@ -128,13 +142,13 @@ class Archive(Source):
 
                     # check result
                     items = [f for f in dst.iterdir()]
-                    if len(items)!=1:
-                        raise Exception(f'extrac many root: {items}')
+                    if len(items) != 1:
+                        raise Exception(f"extrac many root: {items}")
 
                     # move to dst
                     shutil.move(items[0], extract)
 
-            print(os.path.exists(dname))     # False
+            print(os.path.exists(dname))  # False
 
             # LOGGER.info(f"extract: {extract}")
             # self.do_extract(download, extract)
@@ -156,16 +170,6 @@ class Archive(Source):
                 file.write(chunk)
                 pbar.update(len(chunk))
             pbar.close()
-
-    def get_extract_dst(self, src: pathlib.Path) -> pathlib.Path:
-        if self.archive_name.endswith(".tar.xz"):
-            return src / self.archive_name[0:-7]
-        elif self.archive_name.endswith(".tar.gz"):
-            return src / self.archive_name[0:-7]
-        elif self.archive_name.endswith(".tar.bz2"):
-            return src / self.archive_name[0:-8]
-        else:
-            raise NotImplementedError(self.archive_name)
 
 
 class GitRepository(Source):

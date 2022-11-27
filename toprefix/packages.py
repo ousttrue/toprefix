@@ -1,5 +1,5 @@
 from typing import Optional, List
-from .package import Pkg, MesonPkg, CMakePkg, PrebuiltPkg
+from .package import Pkg, MesonPkg, CMakePkg, MakePkg, PrebuiltPkg
 from .package.source import Archive, GitRepository
 
 PKGS: List[Pkg] = [
@@ -19,17 +19,12 @@ PKGS: List[Pkg] = [
             "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.29/wayland-protocols-1.29.tar.bz2"
         )
     ),
-    MesonPkg(
-        Archive.github_tag(
-            "MusicPlayerDaemon", "MPD", "v0.23.10", archive_name="MPD-0.23.10.tar.gz"
-        )
-    ),
+    MesonPkg(Archive.github_tag("MusicPlayerDaemon", "MPD", "v0.23.10")),
     MesonPkg(
         Archive.codeberg_tag(
             "dnkl",
             "foot",
             "1.13.1",
-            archive_name="foot.tar.gz",
         )
     ),
     MesonPkg(
@@ -37,12 +32,15 @@ PKGS: List[Pkg] = [
             "https://github.com/harfbuzz/harfbuzz/releases/download/5.3.1/harfbuzz-5.3.1.tar.xz"
         )
     ),
-    MesonPkg(
-        Archive.codeberg_tag("dnkl", "tllist", "1.1.0", archive_name="tllist.tar.gz")
+    MesonPkg(Archive.codeberg_tag("dnkl", "tllist", "1.1.0")),
+    PrebuiltPkg(Archive.from_url("https://go.dev/dl/go1.19.3.linux-amd64.tar.gz")),
+    PrebuiltPkg(Archive.github_tag("junegunn", "fzf", "0.35.1")),
+    PrebuiltPkg(
+        Archive.from_url(
+            "https://github.com/x-motemen/ghq/releases/download/v1.3.0/ghq_linux_amd64.zip"
+        )
     ),
-    PrebuiltPkg(Archive.from_url('https://go.dev/dl/go1.19.3.linux-amd64.tar.gz'))
 ]
-
 
 
 def list_pkgs():
