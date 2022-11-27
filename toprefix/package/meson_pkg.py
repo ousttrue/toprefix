@@ -58,7 +58,6 @@ class MesonPkg(pkg.Pkg):
         assert extract
 
         # patch
-        # TODO: master => main
 
         # build
         self.configure(extract, prefix, clean=clean, reconfigure=reconfigure)

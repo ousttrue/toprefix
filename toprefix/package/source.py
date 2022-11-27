@@ -163,7 +163,7 @@ class GitRepository(Source):
     def do_clone(self, url: str, dst: pathlib.Path):
         dst.parent.mkdir(parents=True, exist_ok=True)
         with pkg.pushd(dst.parent):
-            pkg.run(f"git clone {url}", {})
+            pkg.run(f"git clone {url}", None)
 
     def extract(self, src_dir: pathlib.Path):
         clone = src_dir / self.name

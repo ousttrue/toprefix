@@ -40,11 +40,6 @@ PKGS: List[Pkg] = [
     MesonPkg(
         Archive.codeberg_tag("dnkl", "tllist", "1.1.0", archive_name="tllist.tar.gz")
     ),
-    CMakePkg(
-        Archive.from_url(
-            "https://download.gnome.org/sources/libxml2/2.10/libxml2-2.10.3.tar.xz"
-        )
-    ),
 ]
 
 

@@ -1,4 +1,4 @@
-from typing import Protocol
+from typing import Protocol, Optional
 import contextlib
 import pathlib
 import logging
@@ -21,7 +21,7 @@ def pushd(path: pathlib.Path):
         os.chdir(cwd)
 
 
-def run(cmd: str, env: dict):
+def run(cmd: str, env: Optional[dict]):
     LOGGER.debug(cmd)
     subprocess.run(cmd, env=env, shell=True, check=True)
 
