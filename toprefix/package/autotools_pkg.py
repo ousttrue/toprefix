@@ -1,20 +1,19 @@
-from typing import Optional
+from . import pkg
+from .source import Source
 import pathlib
 import logging
 import shutil
-from . import pkg
-from .source import Source
+
 
 LOGGER = logging.getLogger(__name__)
 
 
-class MesonPkg(pkg.Pkg):
-    def __init__(self, source: Source, *, args: Optional[str] = None):
+class AutoToolsPkg(pkg.Pkg):
+    def __init__(self, source: Source) -> None:
         self.source = source
-        self.args = args
 
     def __str__(self) -> str:
-        return f"meson: {self.source}"
+        return f"autotools: {self.source}"
 
     def configure(
         self,
@@ -26,31 +25,26 @@ class MesonPkg(pkg.Pkg):
     ):
         LOGGER.info(f"configure: {source_dir} => {prefix}")
         with pkg.pushd(source_dir):
-            if not (source_dir / "build").exists():
+            if clean and (source_dir / "Makefile").exists():
                 pkg.run(
-                    f"meson setup build --prefix {prefix}", env=pkg.make_env(prefix)
+                    f"make distclean",
+                    env=pkg.make_env(prefix),
                 )
-            else:
-                if clean:
-                    shutil.rmtree(source_dir / "build")
-                    pkg.run(
-                        f"meson setup build --prefix {prefix} {self.args}", env=pkg.make_env(prefix)
-                    )
-                elif reconfigure:
-                    pkg.run(
-                        f"meson setup build --prefix {prefix} {self.args} --reconfigure",
-                        env=pkg.make_env(prefix),
-                    )
+
+            pkg.run(
+                f"./configure --prefix={prefix}",
+                env=pkg.make_env(prefix),
+            )
 
     def build(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         LOGGER.info(f"build: {source_dir} => {prefix}")
         with pkg.pushd(source_dir):
-            pkg.run(f"meson compile -C build", env=pkg.make_env(prefix))
+            pkg.run(f"make", env=pkg.make_env(prefix))
 
     def install(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         LOGGER.info(f"install: {source_dir} => {prefix}")
         with pkg.pushd(source_dir):
-            pkg.run(f"meson install -C build", env=pkg.make_env(prefix))
+            pkg.run(f"make install", env=pkg.make_env(prefix))
 
     def process(
         self, *, src: pathlib.Path, prefix: pathlib.Path, clean: bool, reconfigure: bool

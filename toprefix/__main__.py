@@ -89,24 +89,30 @@ def main():
 
         case _:
             parser.print_help()
+            # TODO: color print
+            # https://kaworu.jpn.org/kaworu/2018-05-19-1.php
             print()
             print("environment:")
             print(f"    PREFIX: {unexpand(PREFIX)}")
-            # bin in PATH
+            # PATH
             print(
                 f"        ENV{{PATH}} has {{PREFIX}}/bin: {has_env('PATH', PREFIX/'bin')}"
             )
-            # lib in LD_LIBRARY_PATH
+            # LD_LIBRARY_PATH
             if platform.system() != "Windows":
                 print(
                     f"        ENV{{LD_LIBRARY_PATH}} has {{PREFIX}}/lib64: {has_env('LD_LIBRARY_PATH', PREFIX/'lib64')}"
                 )
-            # lib/pkgconfig in PKG_CONFIG_PATH
+            # PKG_CONFIG_PATH
             print(
                 f"        ENV{{PKG_CONFIG_PATH}} has {{PREFIX}}/lib64/pkgconfig: {has_env('PKG_CONFIG_PATH', PREFIX/'lib64/pkgconfig')}"
             )
             print(
                 f"        ENV{{PKG_CONFIG_PATH}} has {{PREFIX}}/share/pkgconfig: {has_env('PKG_CONFIG_PATH', PREFIX/'share/pkgconfig')}"
+            )
+            # PYTHONPATH
+            print(
+                f"        ENV{{PYTHONPATH}} has {{PREFIX}}/prefix/lib/python3.10/site-packages: {has_env('PYTHONPATH', PREFIX/'lib/python3.10/site-packages')}"
             )
 
             print(f"    SRC: {unexpand(PREFIX_SRC)}")

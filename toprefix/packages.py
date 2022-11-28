@@ -1,5 +1,5 @@
 from typing import Optional, List
-from .package import Pkg, MesonPkg, CMakePkg, MakePkg, PrebuiltPkg
+from .package import Pkg, MesonPkg, CMakePkg, MakePkg, AutoToolsPkg, PrebuiltPkg
 from .package.source import Source, Archive, GitRepository
 import pkgutil
 import toml
@@ -9,9 +9,11 @@ PKGS: List[Pkg] = []
 
 def make_pkg(pkg: str, source: Source) -> Pkg:
     match pkg:
-        case "meson":
-            return MesonPkg(source)
-        case "prebuilt":
+        case {"meson": meson}:
+            return MesonPkg(source, **meson)
+        case {"autotools": autotools}:
+            return AutoToolsPkg(source)
+        case {"prebuilt": prebuilt}:
             return PrebuiltPkg(source)
         case _:
             raise NotImplementedError(pkg)
