@@ -85,6 +85,9 @@ def main():
             print()
             print("environment:")
             print(f"    prefix: {unexpand(PREFIX)}")
+            # bin in PATH
+            # lib in LD_LIBRARY_PATH
+            # lib/pkgconfig in PKG_CONFIG_PATH
             print(f"    src: {unexpand(PREFIX_SRC)}")
             print()
             print_cmd("pkg-config")
