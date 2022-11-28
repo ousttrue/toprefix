@@ -45,6 +45,13 @@ def print_cmd(cmd: str):
         print(f"    {cmd}: not found")
 
 
+def has_env(key: str, path: pathlib.Path) -> bool:
+    for x in os.environ.get(key, "").split(os.pathsep):
+        if path == pathlib.Path(x):
+            return True
+    return False
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="toprefix", description="Build automation to prefix"
@@ -84,11 +91,25 @@ def main():
             parser.print_help()
             print()
             print("environment:")
-            print(f"    prefix: {unexpand(PREFIX)}")
+            print(f"    PREFIX: {unexpand(PREFIX)}")
             # bin in PATH
+            print(
+                f"        ENV{{PATH}} has {{PREFIX}}/bin: {has_env('PATH', PREFIX/'bin')}"
+            )
             # lib in LD_LIBRARY_PATH
+            if platform.system() != "Windows":
+                print(
+                    f"        ENV{{LD_LIBRARY_PATH}} has {{PREFIX}}/lib64: {has_env('LD_LIBRARY_PATH', PREFIX/'lib64')}"
+                )
             # lib/pkgconfig in PKG_CONFIG_PATH
-            print(f"    src: {unexpand(PREFIX_SRC)}")
+            print(
+                f"        ENV{{PKG_CONFIG_PATH}} has {{PREFIX}}/lib64/pkgconfig: {has_env('PKG_CONFIG_PATH', PREFIX/'lib64/pkgconfig')}"
+            )
+            print(
+                f"        ENV{{PKG_CONFIG_PATH}} has {{PREFIX}}/share/pkgconfig: {has_env('PKG_CONFIG_PATH', PREFIX/'share/pkgconfig')}"
+            )
+
+            print(f"    SRC: {unexpand(PREFIX_SRC)}")
             print()
             print_cmd("pkg-config")
             # pkg_config status: PKG_CONFIG_PATH

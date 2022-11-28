@@ -5,6 +5,14 @@ minor = 75
 patch = 0
 pkg = "meson"
 
+[[url]]
+url = "https://gitlab.freedesktop.org/xdg/shared-mime-info/-/archive/2.2/shared-mime-info-2.2.tar.bz2"
+pkg = "meson"
+
+[[url]]
+url = "https://www.cairographics.org/releases/cairo-1.16.0.tar.xz"
+pkg = "meson"
+
 [[gnome]]
 name = "gtk"
 major = 4

@@ -27,9 +27,10 @@ def run(cmd: str, env: Optional[dict]):
 
 
 def make_env(prefix: pathlib.Path) -> dict:
-    env = {k: v for k, v in os.environ.items()}
-    env["PKG_CONFIG_PATH"] = str(prefix / "lib64/pkgconfig")
-    return env
+    return None
+    # env = {k: v for k, v in os.environ.items()}
+    # env["PKG_CONFIG_PATH"] = str(prefix / "lib64/pkgconfig")
+    # return env
 
 
 class Pkg(Protocol):
