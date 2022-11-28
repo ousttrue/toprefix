@@ -5,6 +5,7 @@ from .package.source import Archive, GitRepository
 PKGS: List[Pkg] = [
     MesonPkg(Archive.gnome(name="glib", major=2, minor=75, patch=0)),
     MesonPkg(Archive.gnome(name="gtk", major=4, minor=8, patch=2)),
+    MesonPkg(Archive.gnome(name="gobject-introspection", major=1, minor=74, patch=0)),
     MesonPkg(Archive.gnome(name="pygobject", major=3, minor=42, patch=0)),
     MesonPkg(GitRepository.github("wizbright", "waybox")),
     MesonPkg(GitRepository.github("labwc", "labwc")),

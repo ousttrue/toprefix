@@ -1,7 +1,8 @@
+from typing import Optional
 import argparse
-import sys
 import logging
 import os
+import platform
 import pathlib
 from . import packages
 from . import _version
@@ -10,6 +11,38 @@ LOGGER = logging.getLogger(__name__)
 HOME = pathlib.Path(os.environ["HOME"])
 PREFIX = HOME / "prefix"
 PREFIX_SRC = HOME / "local/src"
+EXE = ".exe" if platform.system() == "Windows" else ""
+
+
+def unexpand(src: pathlib.Path) -> str:
+    relative = []
+    current = src
+    while True:
+        if current == HOME:
+            relative.insert(0, "~")
+            return "/".join(relative)
+        if current.root == current:
+            break
+
+        relative.insert(0, current.name)
+        current = current.parent
+
+    return str(src)
+
+
+def which(cmd: str) -> Optional[pathlib.Path]:
+    for path in os.environ["PATH"].split(os.pathsep):
+        fullpath = pathlib.Path(path) / cmd
+        if fullpath.exists():
+            return fullpath
+
+
+def print_cmd(cmd: str):
+    found = which(f"{cmd}{EXE}")
+    if found:
+        print(f"    {cmd}: {found}")
+    else:
+        print(f"    {cmd}: not found")
 
 
 def main():
@@ -48,15 +81,21 @@ def main():
             )
 
         case _:
-            # TODO:
-            # PREFIX
-            # PREFIX_SRC
-            # pkg_config status: PKG_CONFIG_PATH
-            # win_flex
-            # win_byson
-            # cmake status:
-            # ninja status:
             parser.print_help()
+            print()
+            print("environment:")
+            print(f"    prefix: {unexpand(PREFIX)}")
+            print(f"    src: {unexpand(PREFIX_SRC)}")
+            print()
+            print_cmd("pkg-config")
+            # pkg_config status: PKG_CONFIG_PATH
+            print_cmd("flex")
+            print_cmd("bison")
+            print_cmd("ninja")
+            print_cmd("cmake")
+            print_cmd("meson")
+            print_cmd("make")
+            print()
 
 
 if __name__ == "__main__":
