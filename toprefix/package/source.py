@@ -20,6 +20,8 @@ GNOME_SOURCE_URL = "https://download.gnome.org/sources/{name}/{major}.{minor}/{n
 GITHUB_URL = "https://github.com/{user}/{name}.git"
 GITLAB_URL = "https://gitlab.freedesktop.org/{user}/{name}.git"
 
+VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)(?:\.(\d+))?$")
+
 
 class Source(Protocol):
     name: str
@@ -104,9 +106,13 @@ class Archive(Source):
         raise NotImplementedError(stem)
 
     @staticmethod
-    def gnome(name: str, major, minor, patch) -> "Archive":
+    def gnome(name: str, version: str) -> "Archive":
+        m = VERSION_PATTERN.match(version)
+        assert m
         return Archive.from_url(
-            GNOME_SOURCE_URL.format(name=name, major=major, minor=minor, patch=patch)
+            GNOME_SOURCE_URL.format(
+                name=name, major=m.group(1), minor=m.group(2), patch=m.group(3)
+            )
         )
 
     @staticmethod

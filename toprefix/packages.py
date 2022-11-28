@@ -17,57 +17,30 @@ def make_pkg(pkg: str, source: Source) -> Pkg:
             raise NotImplementedError(pkg)
 
 
-def pkgs_url(items):
-    for item in items:
-        yield make_pkg(item["pkg"], Archive.from_url(item["url"]))
-
-
-def pkgs_gnome(items):
-    for item in items:
-        source = Archive.gnome(
-            name=item["name"],
-            major=item["major"],
-            minor=item["minor"],
-            patch=item["patch"],
-        )
-        yield make_pkg(item["pkg"], source)
-
-
-def pkgs_github(items):
-    for item in items:
-        if "tag" in item:
-            source = Archive.github_tag(item["user"], item["name"], item["tag"])
-        else:
-            source = GitRepository.github(item["user"], item["name"])
-        yield make_pkg(item["pkg"], source)
-
-
-def pkgs_codeberg(items):
-    for item in items:
-        if "tag" in item:
-            source = Archive.codeberg_tag(item["user"], item["name"], item["tag"])
-        else:
+def get_source(name: str, item: dict) -> Source:
+    match item["source"]:
+        case {"gnome": gnome}:
+            return Archive.gnome(name, gnome["version"])
+        case {"url": url}:
+            return Archive.from_url(url)
+        case {"github": repo}:
+            if "tag" in repo:
+                return Archive.github_tag(repo["user"], name, repo["tag"])
+            else:
+                return GitRepository.github(repo["user"], name)
+        case {"codeberg": repo}:
+            if "tag" in repo:
+                return Archive.codeberg_tag(repo["user"], name, repo["tag"])
+            else:
+                return GitRepository.github(repo["user"], name)
+        case _:
             raise NotImplementedError()
-        yield make_pkg(item["pkg"], source)
 
 
 def generate_pkgs(parsed):
     for k, v in parsed.items():
-        match k:
-            case "url":
-                for pkg in pkgs_url(v):
-                    yield pkg
-            case "gnome":
-                for pkg in pkgs_gnome(v):
-                    yield pkg
-            case "github":
-                for pkg in pkgs_github(v):
-                    yield pkg
-            case "codeberg":
-                for pkg in pkgs_codeberg(v):
-                    yield pkg
-            case _:
-                raise NotImplementedError(k)
+        source = get_source(k, v)
+        yield make_pkg(v["pkg"], source)
 
 
 data = pkgutil.get_data("toprefix", "assets/packages.toml")

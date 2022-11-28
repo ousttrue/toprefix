@@ -9,7 +9,9 @@
             "type": "python",
             "request": "launch",
             "module": "toprefix",
-            "args": [],
+            "args": [
+                "list"
+            ],
             "justMyCode": false
         },
     ]
