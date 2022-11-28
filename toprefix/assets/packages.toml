@@ -4,7 +4,7 @@ pkg.meson = {}
 
 [gtk]
 source.gnome.version = "4.8.2"
-pkg.meson.args = "-Dmedia-gstreamer=disabled"
+pkg.meson.args = "-Dmedia-gstreamer=disabled -Dbuild-tests=false"
 
 [gobject-introspection]
 source.gnome.version = "1.74.0"
