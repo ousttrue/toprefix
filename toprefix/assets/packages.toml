@@ -6,6 +6,10 @@ pkg.meson = {}
 source.gnome.version = "4.8.2"
 pkg.meson.args = "-Dmedia-gstreamer=disabled -Dbuild-tests=false"
 
+[gdk-pixbuf]
+source.gnome.version = "2.42.9"
+pkg.meson.args = "-Dtests=false -Dman=false"
+
 [gobject-introspection]
 source.gnome.version = "1.74.0"
 pkg.meson = {}
