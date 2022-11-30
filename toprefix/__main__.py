@@ -112,7 +112,7 @@ def main():
             )
             # PYTHONPATH
             print(
-                f"        ENV{{PYTHONPATH}} has {{PREFIX}}/prefix/lib/python3.10/site-packages: {has_env('PYTHONPATH', PREFIX/'lib/python3.10/site-packages')}"
+                f"        ENV{{PYTHONPATH}} has {{PREFIX}}/lib/python3.10/site-packages: {has_env('PYTHONPATH', PREFIX/'lib/python3.10/site-packages')}"
             )
 
             print(f"    SRC: {unexpand(PREFIX_SRC)}")
