@@ -10,6 +10,18 @@ pkg.meson.args = "-Dmedia-gstreamer=disabled -Dbuild-tests=false"
 source.gnome.version = "3.24.35"
 pkg.meson.args = "-Dwayland_backend=false"
 
+[pango]
+source.gnome.version = '1.50.12'
+pkg.meson = {}
+
+[openbox]
+source.url = "http://openbox.org/dist/openbox/openbox-3.6.1.tar.xz"
+pkg.autotools = {}
+
+[obconf]
+source.url = "http://openbox.org/dist/obconf/obconf-2.0.4.tar.gz"
+pkg.autotools = {}
+
 [atk]
 source.gnome.version = "2.38.0"
 pkg.meson = {}
@@ -94,3 +106,13 @@ pkg.prebuilt = {}
 [ghq]
 source.url = "https://github.com/x-motemen/ghq/releases/download/v1.3.0/ghq_linux_amd64.zip"
 pkg.prebuilt = {}
+
+[tigervnc]
+source.github.user = "TigerVNC"
+source.github.tag = "v1.12.0"
+pkg.cmake = {}
+
+[fltk]
+source.github.user = 'fltk'
+source.github.tag = "release-1.3.8"
+pkg.cmake = {}

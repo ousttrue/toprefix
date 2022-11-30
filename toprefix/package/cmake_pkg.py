@@ -30,7 +30,7 @@ class CMakePkg(pkg.Pkg):
                     shutil.rmtree(source_dir / "build")
 
             pkg.run(
-                f"cmake -S . -B build -DCMAKE_INSTALL_PREFIX={prefix} -DCMAKE_BUILD_TYPE=Release",
+                f"cmake -S . -B build -G Ninja -DCMAKE_INSTALL_PREFIX={prefix} -DCMAKE_BUILD_TYPE=Release",
                 env=pkg.make_env(prefix),
             )
 

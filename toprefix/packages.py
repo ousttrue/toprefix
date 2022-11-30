@@ -11,6 +11,8 @@ def make_pkg(pkg: str, source: Source) -> Pkg:
     match pkg:
         case {"meson": meson}:
             return MesonPkg(source, **meson)
+        case {"cmake": cmake}:
+            return CMakePkg(source)
         case {"autotools": autotools}:
             return AutoToolsPkg(source)
         case {"prebuilt": prebuilt}:
