@@ -1,3 +1,4 @@
+from typing import Optional
 import pathlib
 import shutil
 import logging
@@ -9,8 +10,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class CMakePkg(pkg.Pkg):
-    def __init__(self, source: Source) -> None:
+    def __init__(self, source: Source, *, args: str = "") -> None:
         self.source = source
+        self.args = args
 
     def __str__(self) -> str:
         return f"cmake: {self.source}"
@@ -30,7 +32,7 @@ class CMakePkg(pkg.Pkg):
                     shutil.rmtree(source_dir / "build")
 
             pkg.run(
-                f"cmake -S . -B build -G Ninja -DCMAKE_INSTALL_PREFIX={prefix} -DCMAKE_BUILD_TYPE=Release",
+                f"cmake -S . -B build -G Ninja -DCMAKE_INSTALL_PREFIX={prefix} -DCMAKE_BUILD_TYPE=Release {self.args}",
                 env=pkg.make_env(prefix),
             )
 

@@ -9,7 +9,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class MesonPkg(pkg.Pkg):
-    def __init__(self, source: Source, *, args: Optional[str] = None):
+    def __init__(self, source: Source, *, args: str = ''):
         self.source = source
         self.args = args
 

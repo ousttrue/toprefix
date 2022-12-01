@@ -110,9 +110,40 @@ pkg.prebuilt = {}
 [tigervnc]
 source.github.user = "TigerVNC"
 source.github.tag = "v1.12.0"
-pkg.cmake = {}
+# source.github.tag = "v1.9.0"
+pkg.cmake.args = "-DBUILD_VIEWER=OFF"
 
 [fltk]
 source.github.user = 'fltk'
 source.github.tag = "release-1.3.8"
+pkg.cmake = {}
+
+[turbovnc]
+source.github.user = "TurboVNC"
+source.github.tag = "3.0.2"
+pkg.cmake = {}
+
+[neatvnc]
+source.github.user = "any1"
+source.gethub.tg = 'v0.5.4'
+pkg.meson.args = "-Dexamples=true"
+
+[aml]
+source.github.user = "any1"
+source.github.tag = "v0.2.2"
+pkg.meson = {}
+
+[FreeRDP]
+source.github.user = "FreeRDP"
+source.github.tag = "2.3.0"
+pkg.cmake = {}
+
+[xrdp]
+source.github.user = "neutrinolabs"
+source.github.tag = "v0.9.20"
+pkg.prebuilt = {}
+
+[KasmVNC]
+source.github.user = "kasmtech"
+source.github.tag = "v1.0.0"
 pkg.cmake = {}
