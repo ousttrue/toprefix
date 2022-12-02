@@ -2,8 +2,10 @@ from typing import Optional
 import argparse
 import logging
 import os
+import sys
 import platform
 import pathlib
+import toml
 from . import packages
 from . import _version
 
@@ -12,6 +14,13 @@ HOME = pathlib.Path(os.environ["HOME"])
 PREFIX = HOME / "prefix"
 PREFIX_SRC = HOME / "local/src"
 EXE = ".exe" if platform.system() == "Windows" else ""
+CONFIG_TOML = HOME / ".config/toprefix/toprefix.toml"
+
+if CONFIG_TOML.exists():
+    config = toml.load(CONFIG_TOML)
+    prefix = config.get("prefix")
+    if prefix:
+        PREFIX = pathlib.Path(prefix)
 
 
 def unexpand(src: pathlib.Path) -> str:
@@ -21,7 +30,7 @@ def unexpand(src: pathlib.Path) -> str:
         if current == HOME:
             relative.insert(0, "~")
             return "/".join(relative)
-        if current.root == current:
+        if current.parent == current:
             break
 
         relative.insert(0, current.name)
@@ -37,12 +46,13 @@ def which(cmd: str) -> Optional[pathlib.Path]:
             return fullpath
 
 
-def print_cmd(cmd: str):
-    found = which(f"{cmd}{EXE}")
-    if found:
-        print(f"    {cmd}: {found}")
-    else:
-        print(f"    {cmd}: not found")
+def print_cmd(*cmds: str):
+    for cmd in cmds:
+        found = which(f"{cmd}{EXE}")
+        if found:
+            print(f"    {cmd}: {found}")
+            return
+    print(f"    {cmds}: not found")
 
 
 def has_env(key: str, path: pathlib.Path) -> bool:
@@ -50,6 +60,12 @@ def has_env(key: str, path: pathlib.Path) -> bool:
         if path == pathlib.Path(x):
             return True
     return False
+
+
+def check_prefix_env_path(key: str, value: str, *, indent: str = "        "):
+    print(
+        f"{indent}ENV{{{key}}} has {{PREFIX}}/{value}: {has_env(key, PREFIX / value)}"
+    )
 
 
 def main():
@@ -95,32 +111,50 @@ def main():
             print("environment:")
             print(f"    PREFIX: {unexpand(PREFIX)}")
             # PATH
-            print(
-                f"        ENV{{PATH}} has {{PREFIX}}/bin: {has_env('PATH', PREFIX/'bin')}"
-            )
+            check_prefix_env_path("PATH", "bin")
             # LD_LIBRARY_PATH
             if platform.system() != "Windows":
-                print(
-                    f"        ENV{{LD_LIBRARY_PATH}} has {{PREFIX}}/lib64: {has_env('LD_LIBRARY_PATH', PREFIX/'lib64')}"
-                )
+                check_prefix_env_path("LD_LIBRARY_PATH", "lib64")
             # PKG_CONFIG_PATH
-            print(
-                f"        ENV{{PKG_CONFIG_PATH}} has {{PREFIX}}/lib64/pkgconfig: {has_env('PKG_CONFIG_PATH', PREFIX/'lib64/pkgconfig')}"
-            )
-            print(
-                f"        ENV{{PKG_CONFIG_PATH}} has {{PREFIX}}/share/pkgconfig: {has_env('PKG_CONFIG_PATH', PREFIX/'share/pkgconfig')}"
-            )
+            if platform.system() != "Windows":
+                check_prefix_env_path("PKG_CONFIG_PATH", "lib64/pkgconfig")
+                check_prefix_env_path("PKG_CONFIG_PATH", "share/pkgconfig")
+            else:
+                check_prefix_env_path("PKG_CONFIG_PATH", "lib/pkgconfig")
+                check_prefix_env_path("PKG_CONFIG_PATH", "share/pkgconfig")
             # PYTHONPATH
-            print(
-                f"        ENV{{PYTHONPATH}} has {{PREFIX}}/lib/python3.10/site-packages: {has_env('PYTHONPATH', PREFIX/'lib/python3.10/site-packages')}"
+            if platform.system() != "Windows":
+                python_lib_path = (
+                    PREFIX
+                    / f"lib/python{sys.version_info.major}.{sys.version_info.minor}/site_packages"
+                )
+            else:
+                python_lib_path = PREFIX / f"lib/site-packages"
+            has_sys_path = any(
+                x for x in sys.path if pathlib.Path(x) == python_lib_path
             )
+            if has_sys_path:
+                print(f"        sys.path has {python_lib_path}")
+            else:
+                print(sys.path)
+                if platform.system() != "Windows":
+                    check_prefix_env_path(
+                        "PYTHONPATH",
+                        f"lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages",
+                    )
+                else:
+                    check_prefix_env_path(
+                        "PYTHONPATH",
+                        f"lib/site-packages",
+                    )
 
             print(f"    SRC: {unexpand(PREFIX_SRC)}")
             print()
+            print("tools:")
             print_cmd("pkg-config")
             # pkg_config status: PKG_CONFIG_PATH
-            print_cmd("flex")
-            print_cmd("bison")
+            print_cmd("flex", "win_flex")
+            print_cmd("bison", "win_bison")
             print_cmd("ninja")
             print_cmd("cmake")
             print_cmd("meson")

@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "toprefix",
             "args": [
-                "list"
+                // "list"
             ],
             "justMyCode": false
         },
