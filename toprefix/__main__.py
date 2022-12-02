@@ -8,6 +8,8 @@ import pathlib
 import toml
 from . import packages
 from . import _version
+import colorama
+from colorama import Fore, Back, Style
 
 LOGGER = logging.getLogger(__name__)
 HOME = pathlib.Path(os.environ["HOME"])
@@ -50,9 +52,9 @@ def print_cmd(*cmds: str):
     for cmd in cmds:
         found = which(f"{cmd}{EXE}")
         if found:
-            print(f"    {cmd}: {found}")
+            print(f"    {cmds[0]}: {Fore.GREEN}{found}{Fore.RESET}")
             return
-    print(f"    {cmds}: not found")
+    print(f"    {cmds[0]}: {Fore.RED}not found{Fore.RESET}")
 
 
 def has_env(key: str, path: pathlib.Path) -> bool:
@@ -63,9 +65,15 @@ def has_env(key: str, path: pathlib.Path) -> bool:
 
 
 def check_prefix_env_path(key: str, value: str, *, indent: str = "        "):
-    print(
-        f"{indent}ENV{{{key}}} has {{PREFIX}}/{value}: {has_env(key, PREFIX / value)}"
-    )
+    has = has_env(key, PREFIX / value)
+    if has:
+        print(
+            f"{indent}ENV{{{key}}} has {{PREFIX}}/{value}: {Fore.GREEN}True{Fore.RESET}"
+        )
+    else:
+        print(
+            f"{indent}ENV{{{key}}} has {{PREFIX}}/{value}: {Fore.RED}False{Fore.RESET}"
+        )
 
 
 def main():
@@ -109,7 +117,7 @@ def main():
             # https://kaworu.jpn.org/kaworu/2018-05-19-1.php
             print()
             print("environment:")
-            print(f"    PREFIX: {unexpand(PREFIX)}")
+            print(f"    PREFIX:{Fore.CYAN}{unexpand(PREFIX)}{Fore.RESET}")
             # PATH
             check_prefix_env_path("PATH", "bin")
             # LD_LIBRARY_PATH
@@ -134,9 +142,9 @@ def main():
                 x for x in sys.path if pathlib.Path(x) == python_lib_path
             )
             if has_sys_path:
-                print(f"        sys.path has {python_lib_path}")
+                print(f"    {Fore.GREEN}sys.path has {python_lib_path}{Fore.RESET}")
             else:
-                print(sys.path)
+                # print(sys.path)
                 if platform.system() != "Windows":
                     check_prefix_env_path(
                         "PYTHONPATH",
@@ -148,7 +156,7 @@ def main():
                         f"lib/site-packages",
                     )
 
-            print(f"    SRC: {unexpand(PREFIX_SRC)}")
+            print(f"    SRC:{Fore.CYAN}{unexpand(PREFIX_SRC)}{Fore.RESET}")
             print()
             print("tools:")
             print_cmd("pkg-config")
@@ -164,4 +172,5 @@ def main():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+    colorama.init(autoreset=True)
     main()
