@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__)
 # archive
 GITHUB_TAG_URL = "https://github.com/{user}/{name}/archive/refs/tags/{tag}.tar.gz"
 CODEBERG_TAG_URL = "https://codeberg.org/{user}/{name}/archive/{tag}.tar.gz"
+SOURCEHUT_TAG_URL = "https://git.sr.ht/~{user}/{name}/archive/{tag}.tar.gz"
 GNOME_SOURCE_URL = "https://download.gnome.org/sources/{name}/{major}.{minor}/{name}-{major}.{minor}.{patch}.tar.xz"
 
 # git repository
@@ -111,7 +112,10 @@ class Archive(Source):
         assert m
         return Archive.from_url(
             GNOME_SOURCE_URL.format(
-                name=name, major=m.group(1), minor=m.group(2), patch=m.group(3)
+                name=name,
+                major=m.group(1),
+                minor=m.group(2),
+                patch=m.group(3),
             )
         )
 
@@ -125,16 +129,37 @@ class Archive(Source):
         )
 
     @staticmethod
+    def github_head(user: str, name: str) -> "Archive":
+        return Archive(
+            name,
+            "head",
+            f"https://github.com/{user}/{name}/archive/refs/heads/master.zip",
+            f"{name}.zip",
+        )
+
+    @staticmethod
     def codeberg_tag(user: str, name: str, tag: str) -> "Archive":
         return Archive(
             name,
             tag,
             CODEBERG_TAG_URL.format(user=user, name=name, tag=tag),
+            archive_name=f"{name}-{tag}.tar.gz",
+        )
+
+    @staticmethod
+    def sourcehut_tag(user: str, name: str, tag: str) -> "Archive":
+        return Archive(
+            name,
+            tag,
+            SOURCEHUT_TAG_URL.format(user=user, name=name, tag=tag),
+            archive_name=f"{name}-{tag}.tar.gz",
         )
 
     def extract(self, src: pathlib.Path) -> Optional[pathlib.Path]:
         download = src / self.archive_name
-        if not download.exists():
+        if download.exists():
+            LOGGER.info(f"exists: {download}")
+        else:
             LOGGER.info(f"download: {download}")
             self.do_download(self.url, download)
 

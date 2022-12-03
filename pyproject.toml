@@ -20,7 +20,7 @@ classifiers = [
     #
 ]
 requires-python = ">=3.10"
-dependencies = ["meson", "tqdm", "toml", "colorama"]
+dependencies = ["meson", "tqdm", "toml", "colorama", "colorlog"]
 dynamic = ["version"]
 
 [project.scripts]

@@ -6,6 +6,10 @@ pkg.meson = {}
 source.gnome.version = "4.8.2"
 pkg.meson.args = "-Dmedia-gstreamer=disabled -Dbuild-tests=false"
 
+[gtkmm]
+source.gnome.version = "4.8.0"
+pkg.meson = {}
+
 ["gtk+"]
 source.gnome.version = "3.24.35"
 pkg.meson.args = "-Dwayland_backend=false"
@@ -58,6 +62,10 @@ pkg.meson = {}
 source.url = "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.29/wayland-protocols-1.29.tar.bz2"
 pkg.meson = {}
 
+[pipewire]
+source.url = "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/0.3.61/pipewire-0.3.61.tar.bz2"
+pkg.meson = {}
+
 [cairo]
 # source.url = "https://www.cairographics.org/snapshots/cairo-1.17.4.tar.xz"
 source.github.user = "freedesktop"
@@ -89,6 +97,11 @@ pkg.meson = {}
 source.codeberg.user = "dnkl"
 source.codeberg.tag = "1.1.0"
 pkg.meson = {}
+
+[muon]
+source.sourcehut.user = "lattis"
+source.sourcehut.tag = "0.1.0"
+pkg.meson.args = '-Dbestline=disabled'
 
 [harfbuzz]
 source.url = "https://github.com/harfbuzz/harfbuzz/releases/download/5.3.1/harfbuzz-5.3.1.tar.xz"
@@ -146,4 +159,19 @@ pkg.prebuilt = {}
 [KasmVNC]
 source.github.user = "kasmtech"
 source.github.tag = "v1.0.0"
-pkg.cmake = {}
+pkg.cmake.args = {}
+
+[lua]
+source.github.user = "franko"
+source.github.head = true
+pkg.meson = {}
+
+[lgi]
+source.github.user = "lgi-devs"
+# source.github.tag = "0.9.2"
+pkg.meson = {}
+
+[crystal]
+source.github.user = "crystal-lang"
+source.github.tag = "1.6.2"
+pkg.make.args = "-f Makefile.win verbose=1"

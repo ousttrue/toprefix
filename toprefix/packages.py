@@ -13,6 +13,8 @@ def make_pkg(pkg: str, source: Source) -> Pkg:
             return MesonPkg(source, **meson)
         case {"cmake": cmake}:
             return CMakePkg(source, **cmake)
+        case {"make": make}:
+            return MakePkg(source, **make)
         case {"autotools": autotools}:
             return AutoToolsPkg(source)
         case {"prebuilt": prebuilt}:
@@ -28,15 +30,21 @@ def get_source(name: str, item: dict) -> Source:
         case {"url": url}:
             return Archive.from_url(url)
         case {"github": repo}:
-            if "tag" in repo:
-                return Archive.github_tag(repo["user"], name, repo["tag"])
-            else:
-                return GitRepository.github(repo["user"], name)
+            match repo:
+                case {"user": user, "tag": tag}:
+                    return Archive.github_tag(user, name, tag)
+                case {"user": user}:
+                    return Archive.github_head(user, name)
         case {"codeberg": repo}:
             if "tag" in repo:
                 return Archive.codeberg_tag(repo["user"], name, repo["tag"])
             else:
                 return GitRepository.github(repo["user"], name)
+        case {"sourcehut": repo}:
+            if "tag" in repo:
+                return Archive.sourcehut_tag(repo["user"], name, repo["tag"])
+            else:
+                raise NotImplementedError()
         case _:
             raise NotImplementedError()
 

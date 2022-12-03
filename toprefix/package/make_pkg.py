@@ -1,3 +1,4 @@
+from typing import Optional
 import pathlib
 import logging
 from . import pkg
@@ -8,8 +9,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class MakePkg(pkg.Pkg):
-    def __init__(self, source: Source) -> None:
+    def __init__(self, source: Source, *, args: str) -> None:
         self.source = source
+        self.args = args
 
     def __str__(self) -> str:
         return f"make: {self.source}"
@@ -29,11 +31,12 @@ class MakePkg(pkg.Pkg):
         self.install(extract, prefix)
 
     def build(self, source_dir: pathlib.Path, prefix: pathlib.Path):
-        LOGGER.info(f"build: {source_dir} => {prefix}")
-        with pkg.pushd(source_dir):
-            pkg.run(f"make", env=pkg.make_env(prefix))
+        pass
+        # LOGGER.info(f"build: {source_dir} => {prefix}")
+        # with pkg.pushd(source_dir):
+        #     pkg.run(f"make {self.args}", env=pkg.make_env(prefix))
 
     def install(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         LOGGER.info(f"install: {source_dir} => {prefix}")
         with pkg.pushd(source_dir):
-            pkg.run(f"make install", env=pkg.make_env(prefix))
+            pkg.run(f"make {self.args}", env=pkg.make_env(prefix))

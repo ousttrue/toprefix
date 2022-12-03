@@ -10,6 +10,7 @@ from . import packages
 from . import _version
 import colorama
 from colorama import Fore, Back, Style
+import colorlog
 
 LOGGER = logging.getLogger(__name__)
 HOME = pathlib.Path(os.environ["HOME"])
@@ -77,6 +78,13 @@ def check_prefix_env_path(key: str, value: str, *, indent: str = "        "):
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
+    # handler = colorlog.StreamHandler()
+    # handler.setFormatter(colorlog.ColoredFormatter(
+    #     '%(log_color)s%(levelname)s:%(name)s:%(message)s'))
+    # logging.root.handlers=[handler]
+    colorama.init(autoreset=True)
+
     parser = argparse.ArgumentParser(
         prog="toprefix", description="Build automation to prefix"
     )
@@ -103,7 +111,9 @@ def main():
 
         case "install":
             pkg = packages.get_pkg(args.package)
-            assert pkg
+            if not pkg:
+                print(f"{args.package} {Fore.RED}not found{Fore.RESET}")
+                return
             pkg.process(
                 prefix=PREFIX,
                 src=PREFIX_SRC,
@@ -117,7 +127,7 @@ def main():
             # https://kaworu.jpn.org/kaworu/2018-05-19-1.php
             print()
             print("environment:")
-            print(f"    PREFIX:{Fore.CYAN}{unexpand(PREFIX)}{Fore.RESET}")
+            print(f"    PREFIX: {Fore.CYAN}{unexpand(PREFIX)}{Fore.RESET}")
             # PATH
             check_prefix_env_path("PATH", "bin")
             # LD_LIBRARY_PATH
@@ -156,7 +166,7 @@ def main():
                         f"lib/site-packages",
                     )
 
-            print(f"    SRC:{Fore.CYAN}{unexpand(PREFIX_SRC)}{Fore.RESET}")
+            print(f"    SRC: {Fore.CYAN}{unexpand(PREFIX_SRC)}{Fore.RESET}")
             print()
             print("tools:")
             print_cmd("pkg-config")
@@ -171,6 +181,4 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    colorama.init(autoreset=True)
     main()
