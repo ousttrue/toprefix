@@ -1,4 +1,4 @@
-from typing import Protocol, Optional, Tuple
+from typing import Protocol, Optional, Tuple, List
 import pathlib
 import os
 import re
@@ -26,6 +26,7 @@ VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)(?:\.(\d+))?$")
 
 class Source(Protocol):
     name: str
+    patches: List[pathlib.Path] = []
 
     def extract(self, src_dir: pathlib.Path) -> Optional[pathlib.Path]:
         ...
@@ -44,6 +45,13 @@ def archive_ext(src: str) -> Tuple[str, str]:
         raise NotImplementedError(src)
 
 
+def do_patch(dst: pathlib.Path, patches: List[pathlib.Path]):
+    for patch in patches:
+        LOGGER.info(f"apply: {patch}")
+        with pkg.pushd(dst):
+            pkg.run(f"patch -p0 < {patch}", None)
+
+
 class Archive(Source):
     def __init__(
         self, name: str, version: str, url: str, archive_name: Optional[str] = None
@@ -54,6 +62,7 @@ class Archive(Source):
         if not archive_name:
             archive_name = os.path.basename(self.url)
         self.archive_name = archive_name
+        self.patches = []
 
     def __str__(self) -> str:
         return f"{self.name}-{self.version}"
@@ -64,7 +73,7 @@ class Archive(Source):
         stem, _ = archive_ext(basename)
 
         # {stem}-{version}{extension}
-        m = re.match(r"^(.*)-(\d+)\.(\d+)(\.\d+)?$", stem)
+        m = re.match(r"^(.*)-v?(\d+)\.(\d+)(\.\d+)?$", stem)
         if m:
             name = m.group(1)
             major = m.group(2)
@@ -179,10 +188,12 @@ class Archive(Source):
                     # move to dst
                     shutil.move(items[0], extract)
 
-            print(os.path.exists(dname))  # False
+            assert(not os.path.exists(dname))
 
             # LOGGER.info(f"extract: {extract}")
             # self.do_extract(download, extract)
+
+        do_patch(extract, self.patches)
 
         return extract
 
@@ -207,6 +218,7 @@ class GitRepository(Source):
     def __init__(self, name: str, url: str) -> None:
         self.name = name
         self.url = url
+        self.patches = []
 
     def __str__(self) -> str:
         return f"{self.name}: {self.url}"
@@ -235,4 +247,7 @@ class GitRepository(Source):
         if not clone.exists():
             LOGGER.info(f"clone: {clone}")
             self.do_clone(self.url, clone)
+
+        do_patch(clone, self.patches)
+
         return clone

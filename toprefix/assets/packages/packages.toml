@@ -142,3 +142,11 @@ pkg.custom = '''
 win32/configure.bat --prefix={PREFIX}
 nmake install
 '''
+
+[xfce4-terminal]
+source.url = "https://archive.xfce.org/src/apps/xfce4-terminal/1.0/xfce4-terminal-1.0.4.tar.bz2"
+pkg.autotools = {}
+
+[blackbox]
+source.url = "https://gitlab.gnome.org/raggesilver/blackbox/-/archive/v0.12.2/blackbox-v0.12.2.tar.bz2"
+pkg.meson = {}

@@ -1,0 +1,5 @@
+[w3m]
+source.github.user = "tats"
+source.github.tag = "v0.5.3+git20220429"
+pkg.autotools = {}
+patch.w3m = 'w3m.patch'

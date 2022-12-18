@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Iterable
 from .package import Pkg, MesonPkg, CMakePkg, MakePkg, AutoToolsPkg, PrebuiltPkg
 from .package.source import Source, Archive, GitRepository
 import pkgutil
@@ -53,13 +53,24 @@ def get_source(name: str, item: dict) -> Source:
             raise NotImplementedError()
 
 
+def iter_patch(dir: pathlib.Path, parsed) -> Iterable[pathlib.Path]:
+    match parsed:
+        case {"patch": patch}:
+            for k, v in patch.items():
+                yield dir / v
+
+
 def generate_pkgs(parsed):
     for k, v in parsed.items():
         source = get_source(k, v)
+
+        for patch in iter_patch(f.parent, v):
+            source.patches.append(patch)
+
         yield make_pkg(v["pkg"], source)
 
 
-for f in (HERE / "assets/packages").iterdir():
+for f in HERE.glob("assets/**/*.toml"):
     if f.is_file and f.suffix == ".toml":
         data = f.read_text(encoding="utf-8")
         parsed = toml.loads(data)
