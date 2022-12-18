@@ -41,3 +41,7 @@ pkg.meson = {}
 [pygobject]
 source.gnome.version = "3.42.0"
 pkg.meson = {}
+
+[vte]
+source.gnome.version = "0.70.2"
+pkg.meson.args = "-Dgtk3=false -Dgtk4=true"

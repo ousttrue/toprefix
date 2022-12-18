@@ -5,6 +5,7 @@ import pkgutil
 import pathlib
 import toml
 
+HERE = pathlib.Path(__file__).absolute().parent
 PKGS: List[Pkg] = []
 
 
@@ -58,12 +59,12 @@ def generate_pkgs(parsed):
         yield make_pkg(v["pkg"], source)
 
 
-assets = pathlib.Path(pkgutil.extend_path("toprefix", "assets/packages"))
-for f in assets.rglob("**/*.toml"):
-    data = f.read_text(encoding="utf-8")
-    parsed = toml.loads(data)
-    for pkg in generate_pkgs(parsed):
-        PKGS.append(pkg)
+for f in (HERE / "assets/packages").iterdir():
+    if f.is_file and f.suffix == ".toml":
+        data = f.read_text(encoding="utf-8")
+        parsed = toml.loads(data)
+        for pkg in generate_pkgs(parsed):
+            PKGS.append(pkg)
 
 
 def list_pkgs():
