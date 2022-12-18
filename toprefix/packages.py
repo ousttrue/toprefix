@@ -2,6 +2,7 @@ from typing import Optional, List
 from .package import Pkg, MesonPkg, CMakePkg, MakePkg, AutoToolsPkg, PrebuiltPkg
 from .package.source import Source, Archive, GitRepository
 import pkgutil
+import pathlib
 import toml
 
 PKGS: List[Pkg] = []
@@ -35,6 +36,8 @@ def get_source(name: str, item: dict) -> Source:
                     return Archive.github_tag(user, name, tag)
                 case {"user": user}:
                     return Archive.github_head(user, name)
+                case _:
+                    raise NotImplementedError()
         case {"codeberg": repo}:
             if "tag" in repo:
                 return Archive.codeberg_tag(repo["user"], name, repo["tag"])
@@ -55,9 +58,10 @@ def generate_pkgs(parsed):
         yield make_pkg(v["pkg"], source)
 
 
-data = pkgutil.get_data("toprefix", "assets/packages.toml")
-if data:
-    parsed = toml.loads(data.decode("utf-8"))
+assets = pathlib.Path(pkgutil.extend_path("toprefix", "assets/packages"))
+for f in assets.rglob("**/*.toml"):
+    data = f.read_text(encoding="utf-8")
+    parsed = toml.loads(data)
     for pkg in generate_pkgs(parsed):
         PKGS.append(pkg)
 
