@@ -6,6 +6,10 @@ pkg.autotools = {}
 source.url = "http://openbox.org/dist/obconf/obconf-2.0.4.tar.gz"
 pkg.autotools = {}
 
+[fontconfig]
+source.url = "https://gitlab.freedesktop.org/fontconfig/fontconfig/-/archive/2.14.1/fontconfig-2.14.1.tar.bz2"
+pkg.meson = {}
+
 [shared-mime-info]
 source.url = "https://gitlab.freedesktop.org/xdg/shared-mime-info/-/archive/2.2/shared-mime-info-2.2.tar.bz2"
 pkg.meson = {}
@@ -23,7 +27,7 @@ source.url = "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/0.3.61/
 pkg.meson = {}
 
 [cairo]
-# source.url = "https://www.cairographics.org/snapshots/cairo-1.17.4.tar.xz"
+source.url = "https://www.cairographics.org/snapshots/cairo-1.17.4.tar.xz"
 source.github.user = "freedesktop"
 pkg.meson = {}
 
