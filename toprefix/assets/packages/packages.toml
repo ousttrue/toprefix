@@ -26,10 +26,10 @@ pkg.meson = {}
 source.url = "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/0.3.61/pipewire-0.3.61.tar.bz2"
 pkg.meson = {}
 
-[cairo]
-source.url = "https://www.cairographics.org/snapshots/cairo-1.17.4.tar.xz"
-source.github.user = "freedesktop"
-pkg.meson = {}
+# [cairo]
+# source.url = "https://www.cairographics.org/snapshots/cairo-1.17.4.tar.xz"
+# source.github.user = "freedesktop"
+# pkg.meson = {}
 
 [pixman]
 source.url = "https://www.cairographics.org/snapshots/pixman-0.33.6.tar.gz"
@@ -159,3 +159,21 @@ pkg.meson = {}
 source.github.user = "neovim"
 source.github.tag = "v0.8.1"
 pkg.cmake = {}
+
+# [doxygen]
+# source.url = "https://github.com/doxygen/doxygen/releases/download/Release_1_9_6/doxygen-1.9.6.windows.x64.bin.zip"
+# pkg.prebuilt = {}
+
+[libiconv]
+source.url = "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz"
+pkg.cmake = {}
+
+[win-iconv]
+source.github.user = "win-iconv"
+source.github.tag = "v0.0.8"
+pkg.cmake = {}
+
+[xz]
+source.github.user = "tukaani-project"
+source.github.tag = "v5.4.1"
+pkg.cmake.args = "-DBUILD_SHARED_LIBS=ON"

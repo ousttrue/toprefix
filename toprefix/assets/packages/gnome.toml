@@ -1,4 +1,8 @@
 [glib]
+source.gnome.version = "2.75.2"
+pkg.meson = {}
+
+[glibmm]
 source.gnome.version = "2.75.0"
 pkg.meson = {}
 
@@ -39,7 +43,7 @@ source.gnome.version = "1.74.0"
 pkg.meson = {}
 
 [pygobject]
-source.gnome.version = "3.42.0"
+source.gnome.version = "3.43.1"
 pkg.meson = {}
 
 [vte]
@@ -49,3 +53,15 @@ pkg.meson.args = "-Dgtk3=false -Dgtk4=true"
 [gnome-terminal]
 source.gnome.version = "3.44.1"
 pkg.meson = {}
+
+[cairo]
+source.gnome.version = "1.17.6"
+pkg.meson = {}
+
+[libxslt]
+source.gnome.version = "1.1.37"
+pkg.cmake.args = "-DLIBXSLT_WITH_PYTHON=OFF"
+
+[libxml2]
+source.gnome.version = "2.10.3"
+pkg.cmake.args = "-DLIBXML2_WITH_PYTHON=OFF"
