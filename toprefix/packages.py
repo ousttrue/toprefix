@@ -21,6 +21,9 @@ def make_pkg(pkg: str, source: Source) -> Pkg:
             return AutoToolsPkg(source)
         case {"prebuilt": prebuilt}:
             return PrebuiltPkg(source)
+        case {"custom": commands}:
+            print(commands)
+            raise NotImplementedError(pkg)
         case _:
             raise NotImplementedError(pkg)
 

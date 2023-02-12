@@ -7,12 +7,24 @@ source.gnome.version = "2.75.0"
 pkg.meson = {}
 
 [gtk]
-source.gnome.version = "4.8.2"
+source.gnome.version = "4.9.3"
 pkg.meson.args = "-Dmedia-gstreamer=disabled -Dbuild-tests=false"
 
 [gtkmm]
-source.gnome.version = "4.8.0"
+source.gnome.version = "4.9.3"
 pkg.meson = {}
+
+["libsigc++"]
+source.gnome.version = "3.4.0"
+pkg.meson = {}
+
+[mm-common]
+source.gnome.version = "1.0.5"
+pkg.meson = {}
+
+[pangomm]
+source.gnome.version = "2.50.1"
+pkg.meson.args = "-Dbuild-documentation=false"
 
 ["gtk+"]
 source.gnome.version = "3.24.35"
@@ -65,3 +77,7 @@ pkg.cmake.args = "-DLIBXSLT_WITH_PYTHON=OFF"
 [libxml2]
 source.gnome.version = "2.10.3"
 pkg.cmake.args = "-DLIBXML2_WITH_PYTHON=OFF"
+
+[gstreamer]
+source.gnome.version = "1.18.0"
+pkg.meson = {}

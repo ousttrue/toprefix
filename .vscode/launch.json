@@ -10,7 +10,8 @@
             "request": "launch",
             "module": "toprefix",
             "args": [
-                "list"
+                // "install",
+                // "ruby",
             ],
             "justMyCode": false
         },

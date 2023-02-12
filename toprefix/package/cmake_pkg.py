@@ -10,9 +10,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 class CMakePkg(pkg.Pkg):
-    def __init__(self, source: Source, *, args: str = "") -> None:
+    def __init__(
+        self, source: Source, *, args: str = "", cmake_source: str = "."
+    ) -> None:
         self.source = source
         self.args = args
+        self.cmake_source = cmake_source
 
     def __str__(self) -> str:
         return f"cmake: {self.source}"
@@ -32,7 +35,7 @@ class CMakePkg(pkg.Pkg):
                     shutil.rmtree(source_dir / "build")
 
             pkg.run(
-                f"cmake -S . -B build -G Ninja -DCMAKE_INSTALL_PREFIX={prefix} -DCMAKE_BUILD_TYPE=Release {self.args}",
+                f"cmake -S {self.cmake_source} -B build -G Ninja -DCMAKE_INSTALL_PREFIX={prefix} -DCMAKE_BUILD_TYPE=Release {self.args}",
                 env=pkg.make_env(prefix),
             )
 
