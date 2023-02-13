@@ -4,5 +4,14 @@ from .cmake_pkg import CMakePkg
 from .make_pkg import MakePkg
 from .autotools_pkg import AutoToolsPkg
 from .prebuilt_pkg import PrebuiltPkg
+from .custom_pkg import CustomPkg
 
-__all__ = ["Pkg", "MesonPkg", "CMakePkg", "MakePkg", "AutoToolsPkg", "PrebuiltPkg"]
+__all__ = [
+    "Pkg",
+    "MesonPkg",
+    "CMakePkg",
+    "MakePkg",
+    "AutoToolsPkg",
+    "PrebuiltPkg",
+    "CustomPkg",
+]

@@ -1,10 +1,49 @@
-from typing import Dict
+from typing import Dict, Optional
 import platform
 import os
 import subprocess
+import pathlib
+import json
+import vswhere
 
-# VCBARS64 = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat'
-VCBARS64 = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat"
+KITS = pathlib.Path(f"{os.environ['LOCALAPPDATA']}/CMakeTools/cmake-tools-kits.json")
+
+
+# VCBARS64_2019 = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat'
+# VCBARS64_2022 = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat"
+
+
+def select_x64_kit() -> Optional[dict]:
+    if KITS.exists():
+        parsed = json.loads(KITS.read_text(encoding="utf-8"))
+        for kit in parsed:
+            match kit:
+                case {
+                    "preferredGenerator": {
+                        "platform": "x64",
+                        "toolset": "host=x64",
+                    }
+                }:
+                    return kit
+
+
+def get_vs_path(name: str) -> Optional[pathlib.Path]:
+    for product in vswhere.find(products="*"):
+        if product["displayName"] == name:
+            return pathlib.Path(product["installationPath"])
+
+
+def get_vcbars() -> pathlib.Path:
+    kit = select_x64_kit()
+    if kit:
+        name = kit["name"].split("-")[0].strip()
+        if name.endswith(" Release"):
+            name = name[0:-8]
+        path = get_vs_path(name)
+        if path:
+            return path / "VC\\Auxiliary\\Build\\vcvars64.bat"
+
+    raise FileNotFoundError()
 
 
 def decode(b: bytes) -> str:
@@ -21,7 +60,9 @@ def vcvars64() -> Dict[str, str]:
     # %comspec% /k cmd
     comspec = os.environ["comspec"]
     process = subprocess.Popen(
-        [comspec, "/k", VCBARS64, "&", "set", "&", "exit"], stdout=subprocess.PIPE
+        [comspec, "/k", get_vcbars(), "&", "set", "&", "exit"],
+        stdout=subprocess.PIPE,
+        shell=False,
     )
 
     stdout = process.stdout

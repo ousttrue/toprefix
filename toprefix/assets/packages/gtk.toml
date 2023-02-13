@@ -1,0 +1,7 @@
+[glib]
+source.gnome.version = "2.75.2"
+pkg.meson = {}
+
+[gtk]
+source.gnome.version = "4.9.3"
+pkg.meson.args = "-Dmedia-gstreamer=disabled -Dbuild-tests=false"

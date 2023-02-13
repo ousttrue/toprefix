@@ -78,14 +78,16 @@ def check_prefix_env_path(key: str, value: str, *, indent: str = "        "):
             f"{indent}ENV{{{key}}} has {{PREFIX}}/{value}: {Fore.RED}False{Fore.RESET}"
         )
 
+
 def apply_vcenv():
     for k, v in vcenv.get_env().items():
-        if k=='PATH':
-            current = os.environ['PATH'].split(';')
-            add_path = [x for x in v.split(';') if x not in current]
-            os.environ['PATH'] = ';'.join(add_path) + ';' + os.environ['PATH']
+        if k == "PATH":
+            current = os.environ["PATH"].split(";")
+            add_path = [x for x in v.split(";") if x not in current]
+            os.environ["PATH"] = ";".join(add_path) + ";" + os.environ["PATH"]
         else:
             os.environ[k] = v
+
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
@@ -138,7 +140,7 @@ def main():
             # https://kaworu.jpn.org/kaworu/2018-05-19-1.php
             print()
             print("environment:")
-            print(f"    PREFIX: {Fore.CYAN}{unexpand(PREFIX)}{Fore.RESET}")
+            print(f"  PREFIX: {Fore.CYAN}{unexpand(PREFIX)}{Fore.RESET}")
             # PATH
             check_prefix_env_path("PATH", "bin")
             # LD_LIBRARY_PATH
@@ -177,20 +179,24 @@ def main():
                         f"lib/site-packages",
                     )
 
-            print(f"    SRC: {Fore.CYAN}{unexpand(PREFIX_SRC)}{Fore.RESET}")
+            print(f"  SRC: {Fore.CYAN}{unexpand(PREFIX_SRC)}{Fore.RESET}")
+            print()
 
             if platform.system() == "Windows":
-                print(f"    VCENV: {Fore.CYAN}{vcenv.VCBARS64}{Fore.RESET}")
+                print(f"vcenv: {Fore.CYAN}{vcenv.get_vcbars()}{Fore.RESET}")
                 for k, v in vcenv.get_env().items():
+                    print(f"  {k} =>")
                     if k == "PATH":
                         current = os.environ["PATH"].split(";")
                         for vc_split in v.split(";"):
                             if vc_split not in current:
-                                print(f"        {k} => {vc_split}")
+                                print(f"    {vc_split}")
                     else:
-                        print(f"        {k} => {v}")
-
-            print()
+                        path_list = v.split(";")
+                        path_list.sort()
+                        for path in path_list:
+                            print(f"    {path}")
+                print()
 
             print("tools:")
             print_cmd("pkg-config")

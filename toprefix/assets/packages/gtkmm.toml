@@ -1,0 +1,19 @@
+[glibmm]
+source.gnome.version = "2.75.0"
+pkg.meson = {}
+
+[gtkmm]
+source.gnome.version = "4.9.3"
+pkg.meson = {}
+
+["libsigc++"]
+source.gnome.version = "3.4.0"
+pkg.meson = {}
+
+[mm-common]
+source.gnome.version = "1.0.5"
+pkg.meson = {}
+
+[pangomm]
+source.gnome.version = "2.50.1"
+pkg.meson.args = "-Dbuild-documentation=false"

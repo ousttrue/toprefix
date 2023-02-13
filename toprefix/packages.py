@@ -1,5 +1,5 @@
 from typing import Optional, List, Iterable
-from .package import Pkg, MesonPkg, CMakePkg, MakePkg, AutoToolsPkg, PrebuiltPkg
+from .package import Pkg, MesonPkg, CMakePkg, MakePkg, AutoToolsPkg, PrebuiltPkg, CustomPkg
 from .package.source import Source, Archive, GitRepository
 import pkgutil
 import pathlib
@@ -22,8 +22,7 @@ def make_pkg(pkg: str, source: Source) -> Pkg:
         case {"prebuilt": prebuilt}:
             return PrebuiltPkg(source)
         case {"custom": commands}:
-            print(commands)
-            raise NotImplementedError(pkg)
+            return CustomPkg(commands)
         case _:
             raise NotImplementedError(pkg)
 

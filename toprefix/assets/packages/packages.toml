@@ -136,17 +136,14 @@ source.github.user = "crystal-lang"
 source.github.tag = "1.6.2"
 pkg.make.args = "-f Makefile.win verbose=1"
 
-# [ruby]
-# source.github.user = "ruby"
-# source.github.tag = "v3_1_3"
-# pkg.custom = '''
-# win32/configure.bat --prefix={PREFIX}
-# nmake install
-# '''
-
-# source.url = "https://cache.ruby-lang.org/pub/ruby/3.1/ruby-3.1.3.tar.xz"
-# pkg.prebuilt = {}
-# pkg.nmake.args = ""
+[ruby]
+source.github.user = "ruby"
+source.github.tag = "v3_1_3"
+[ruby.pkg]
+custom = '''
+win32/configure.bat --prefix={PREFIX}
+nmake install
+'''
 
 [xfce4-terminal]
 source.url = "https://archive.xfce.org/src/apps/xfce4-terminal/1.0/xfce4-terminal-1.0.4.tar.bz2"
