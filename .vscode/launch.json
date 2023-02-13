@@ -10,8 +10,8 @@
             "request": "launch",
             "module": "toprefix",
             "args": [
-                // "install",
-                // "ruby",
+                "install",
+                "neovim",
             ],
             "justMyCode": false
         },

@@ -155,8 +155,15 @@ pkg.meson = {}
 
 [neovim]
 source.github.user = "neovim"
-source.github.tag = "v0.8.1"
-pkg.cmake = {}
+source.github.tag = "v0.8.3"
+[neovim.pkg]
+custom = '''
+cmake -S cmake.deps -B .deps -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build .deps
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build
+cmake --install --prefix {PREFIX}
+'''
 
 # [doxygen]
 # source.url = "https://github.com/doxygen/doxygen/releases/download/Release_1_9_6/doxygen-1.9.6.windows.x64.bin.zip"
