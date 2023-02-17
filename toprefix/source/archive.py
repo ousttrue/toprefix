@@ -7,6 +7,7 @@ import shutil
 import re
 import tqdm
 import tempfile
+from ..envman import EnvMan
 from .source import Source
 from toprefix import util
 
@@ -148,8 +149,8 @@ class Archive(Source):
             archive_name=f"{name}-{tag}.tar.gz",
         )
 
-    def extract(self, src: pathlib.Path) -> Optional[pathlib.Path]:
-        download = src / self.archive_name
+    def extract(self, env: EnvMan) -> Optional[pathlib.Path]:
+        download = env.PREFIX_SRC / self.archive_name
         if download.exists():
             LOGGER.info(f"exists: {download}")
         else:
@@ -157,11 +158,11 @@ class Archive(Source):
             self.do_download(self.url, download)
 
         stem, _ = archive_ext(self.archive_name)
-        extract = src / stem
+        extract = env.PREFIX_SRC / stem
         if not extract.exists():
             with tempfile.TemporaryDirectory() as dname:
                 dst = pathlib.Path(dname)
-                with util.pushd(dst):
+                with env.pushd(dst):
                     shutil.unpack_archive(download)
 
                     # check result
@@ -177,7 +178,7 @@ class Archive(Source):
             # LOGGER.info(f"extract: {extract}")
             # self.do_extract(download, extract)
 
-        util.do_patch(extract, self.patches)
+        env.do_patch(extract, self.patches)
 
         return extract
 

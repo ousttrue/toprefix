@@ -1,7 +1,7 @@
 from .source import Source
 import logging
 import pathlib
-
+from ..envman import EnvMan
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,17 +33,17 @@ class GitRepository(Source):
             GITLAB_URL.format(user=user, name=name),
         )
 
-    def do_clone(self, url: str, dst: pathlib.Path):
+    def do_clone(self, env: EnvMan, url: str, dst: pathlib.Path):
         dst.parent.mkdir(parents=True, exist_ok=True)
-        with util.pushd(dst.parent):
-            pkg.run(f"git clone {url}", None)
+        with env.pushd(dst.parent):
+            env.run(f"git clone {url}")
 
-    def extract(self, src_dir: pathlib.Path):
-        clone = src_dir / self.name
+    def extract(self, env: EnvMan):
+        clone = env.PREFIX_SRC / self.name
         if not clone.exists():
             LOGGER.info(f"clone: {clone}")
-            self.do_clone(self.url, clone)
+            self.do_clone(env, self.url, clone)
 
-        do_patch(clone, self.patches)
+        env.do_patch(clone, self.patches)
 
         return clone

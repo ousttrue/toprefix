@@ -1,0 +1,11 @@
+--- .\src\nvim\CMakeLists copy.txt	Fri Feb 17 12:19:40 2023
++++ .\src\nvim\CMakeLists.txt	Sat Feb 18 03:00:20 2023
+@@ -84,7 +84,7 @@ if(ENABLE_IWYU)
+ endif()
+ 
+ if(MSVC)
+-  target_compile_options(main_lib INTERFACE -W3)
++  target_compile_options(main_lib INTERFACE -W3 /source-charset:utf-8 /wd4244 /wd4267 /wd4996 /wd4566)
+ 
+   # Disable warnings that give too many false positives.
+   target_compile_options(main_lib INTERFACE -wd4311 -wd4146)

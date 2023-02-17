@@ -1,24 +1,14 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 import pathlib, os, platform, sys
 import toml
 import logging
+import contextlib
 import subprocess
 import colorama
 from colorama import Fore, Back, Style
 from . import vcenv
 
 LOGGER = logging.getLogger(__name__)
-
-
-def minimum_env():
-    env = {}
-    path = [
-        os.environ["SystemRoot"] + "\\System32",
-        os.environ["SystemRoot"] + "\\System32\\WindowsPowerShell\\v1.0",
-    ]
-    env["PATH"] = ";".join(path)
-    env["SystemRoot"] = os.environ["SystemRoot"]
-    return env
 
 
 class EnvMan:
@@ -41,6 +31,38 @@ class EnvMan:
 
         self.PATH_LIST = os.environ["PATH"].split(os.pathsep)
 
+    def minimum_env(self):
+        git = self.which("git")
+        if not git:
+            raise Exception("git required")
+        env = {}
+        path: List[str] = [
+            os.environ["SystemRoot"] + "\\System32",
+            os.environ["SystemRoot"] + "\\System32\\WindowsPowerShell\\v1.0",
+            str(git.parent),
+        ]
+        env["PATH"] = ";".join(path)
+        for k in (
+            "SystemRoot",
+            "APPDATA",
+            "LOCALAPPDATA",
+            "ComSpec",
+            "OS",
+            "NUMBER_OF_PROCESSORS",
+            "PROCESSOR_ARCHITECTURE",
+            "PROCESSOR_IDENTIFIER",
+            "PROCESSOR_LEVEL",
+            "PROCESSOR_REVISION",
+            "POWERSHELL_DISTRIBUTION_CHANNEL",
+            "PSModulePath",
+            "TEMP",
+            "TMP",
+            "USERNAME",
+            "USERPROFILE",
+        ):
+            env[k] = os.environ[k]
+        return env
+
     def unexpand(self, src: pathlib.Path) -> str:
         relative = []
         current = src
@@ -58,13 +80,13 @@ class EnvMan:
 
     def which(self, cmd: str) -> Optional[pathlib.Path]:
         for path in self.PATH_LIST:
-            fullpath = pathlib.Path(path) / cmd
+            fullpath = pathlib.Path(path) / f"{cmd}{self.EXE}"
             if fullpath.exists():
                 return fullpath
 
     def print_cmd(self, *cmds: str):
         for cmd in cmds:
-            found = self.which(f"{cmd}{self.EXE}")
+            found = self.which(f"{cmd}")
             if found:
                 print(f"    {cmds[0]}: {Fore.GREEN}{found}{Fore.RESET}")
                 return
@@ -87,39 +109,22 @@ class EnvMan:
                 f"{indent}ENV{{{key}}} has {{PREFIX}}/{value}: {Fore.RED}False{Fore.RESET}"
             )
 
-    def apply_vcenv(self):
-        for k, v in vcenv.get_env().items():
-            if k == "PATH":
-                current = os.environ["PATH"].split(";")
-                add_path = [x for x in v.split(";") if x not in current]
-                os.environ["PATH"] = ";".join(add_path) + ";" + os.environ["PATH"]
-            else:
-                os.environ[k] = v
+    # def apply_vcenv(self):
+    #     for k, v in vcenv.get_env().items():
+    #         if k == "PATH":
+    #             current = os.environ["PATH"].split(";")
+    #             add_path = [x for x in v.split(";") if x not in current]
+    #             os.environ["PATH"] = ";".join(add_path) + ";" + os.environ["PATH"]
+    #         else:
+    #             os.environ[k] = v
 
-    def run(self, cmd: str):
-        env = minimum_env()
-        for k in (
-            "ComSpec",
-            "OS",
-            "NUMBER_OF_PROCESSORS",
-            "PROCESSOR_ARCHITECTURE",
-            "PROCESSOR_IDENTIFIER",
-            "PROCESSOR_LEVEL",
-            "PROCESSOR_REVISION",
-            "POWERSHELL_DISTRIBUTION_CHANNEL",
-            "PSModulePath",
-            "TEMP",
-            "TMP",
-            "USERNAME",
-            "USERPROFILE",
-        ):
-            env[k] = os.environ[k]
-
+    def run(self, cmd: str, *, check=True):
+        env = self.minimum_env()
         env.update(vcenv.get_env(env))
         cmd = cmd.format(PREFIX=self.PREFIX)
         LOGGER.debug(cmd)
         LOGGER.debug(env.keys())
-        subprocess.run(cmd, env=env, shell=True, check=True)
+        subprocess.run(cmd, env=env, shell=True, check=check)
 
     # def make_env(prefix: pathlib.Path) -> dict:
     #     return None
@@ -174,7 +179,7 @@ class EnvMan:
 
         if platform.system() == "Windows":
             print(f"vcenv: {Fore.CYAN}{vcenv.get_vcbars()}{Fore.RESET}")
-            env = minimum_env()
+            env = self.minimum_env()
             for k, v in vcenv.get_env(env).items():
                 print(f"  {k} =>")
                 if k == "PATH":
@@ -201,3 +206,20 @@ class EnvMan:
         self.print_cmd("m4")
         self.print_cmd("perl")
         print()
+
+    def do_patch(self, dst: pathlib.Path, patches: List[pathlib.Path]):
+        for patch in patches:
+            LOGGER.info(f"apply: {patch}")
+            with self.pushd(dst):
+                self.run(f"patch -p0 < {patch}", check=False)
+
+    @contextlib.contextmanager
+    def pushd(self, path: pathlib.Path):
+        LOGGER.debug(f"pushd: {path}")
+        cwd = os.getcwd()
+        try:
+            os.chdir(path)
+            yield
+        finally:
+            LOGGER.debug(f"popd: {cwd}")
+            os.chdir(cwd)

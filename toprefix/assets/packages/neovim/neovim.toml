@@ -1,0 +1,13 @@
+[neovim]
+source.github.user = "neovim"
+# source.github.tag = "v0.8.3"
+source.github.tag = "nightly"
+patch.neovim = 'neovim.patch'
+[neovim.pkg]
+custom = '''
+cmake -S cmake.deps -B .deps -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build .deps
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+cmake --install build --prefix {PREFIX}
+'''

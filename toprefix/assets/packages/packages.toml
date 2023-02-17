@@ -153,19 +153,6 @@ pkg.autotools = {}
 source.url = "https://gitlab.gnome.org/raggesilver/blackbox/-/archive/v0.12.2/blackbox-v0.12.2.tar.bz2"
 pkg.meson = {}
 
-[neovim]
-source.github.user = "neovim"
-# source.github.tag = "v0.8.3"
-source.github.tag = "nightly"
-[neovim.pkg]
-custom = '''
-cmake -S cmake.deps -B .deps -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
-cmake --build .deps
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX={PREFIX}
-cmake --build build
-cmake --install build
-'''
-
 # [doxygen]
 # source.url = "https://github.com/doxygen/doxygen/releases/download/Release_1_9_6/doxygen-1.9.6.windows.x64.bin.zip"
 # pkg.prebuilt = {}

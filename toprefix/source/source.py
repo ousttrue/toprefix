@@ -1,6 +1,7 @@
 from typing import Protocol, Optional, Tuple, List
 import pathlib
 import re
+from ..envman import EnvMan
 
 # archive
 GITHUB_TAG_URL = "https://github.com/{user}/{name}/archive/refs/tags/{tag}.tar.gz"
@@ -19,5 +20,5 @@ class Source(Protocol):
     name: str
     patches: List[pathlib.Path] = []
 
-    def extract(self, src_dir: pathlib.Path) -> Optional[pathlib.Path]:
+    def extract(self, env: EnvMan) -> Optional[pathlib.Path]:
         ...

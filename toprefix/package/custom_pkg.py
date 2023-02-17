@@ -16,10 +16,10 @@ class CustomPkg(pkg.Pkg):
         self.commands = commands
 
     def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):
-        extract = self.source.extract(env.PREFIX_SRC)
+        extract = self.source.extract(env)
         assert extract
 
         LOGGER.info(f"custom: {extract} => {env.PREFIX}")
-        with util.pushd(extract):
+        with env.pushd(extract):
             for command in self.commands:
                 env.run(command)
