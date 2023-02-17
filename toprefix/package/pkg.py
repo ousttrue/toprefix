@@ -5,6 +5,7 @@ import logging
 import os
 import subprocess
 from .source import Source
+from ..envman import EnvMan
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,22 +22,8 @@ def pushd(path: pathlib.Path):
         os.chdir(cwd)
 
 
-def run(cmd: str, env: Optional[dict]):
-    LOGGER.debug(cmd)
-    subprocess.run(cmd, env=env, shell=True, check=True)
-
-
-def make_env(prefix: pathlib.Path) -> dict:
-    return None
-    # env = {k: v for k, v in os.environ.items()}
-    # env["PKG_CONFIG_PATH"] = str(prefix / "lib64/pkgconfig")
-    # return env
-
-
 class Pkg(Protocol):
     source: Source
 
-    def process(
-        self, *, src: pathlib.Path, prefix: pathlib.Path, clean: bool, reconfigure: bool
-    ):
+    def process(self, *, env=EnvMan, clean: bool, reconfigure: bool):
         ...

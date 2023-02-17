@@ -3,7 +3,7 @@ import pathlib
 import logging
 from . import pkg
 from .source import Source
-
+from ..envman import EnvMan
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class MakePkg(pkg.Pkg):
         return f"make: {self.source}"
 
     def process(
-        self, *, src: pathlib.Path, prefix: pathlib.Path, clean: bool, reconfigure: bool
+        self, *, env: EnvMan, clean: bool, reconfigure: bool
     ):
         LOGGER.info(f"install: {self}")
         extract = self.source.extract(src)

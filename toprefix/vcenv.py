@@ -56,12 +56,17 @@ def decode(b: bytes) -> str:
         return b.decode("utf-8")
 
 
-def vcvars64() -> Dict[str, str]:
+def vcvars64(env) -> Dict[str, str]:
     # %comspec% /k cmd
     comspec = os.environ["comspec"]
+    path = [
+        os.environ["SystemRoot"] + "\\System32",
+        os.environ["SystemRoot"] + "\\System32\\WindowsPowerShell\\v1.0",
+    ]
     process = subprocess.Popen(
         [comspec, "/k", get_vcbars(), "&", "set", "&", "exit"],
         stdout=subprocess.PIPE,
+        env=env if env!=None else None,
         shell=False,
     )
 
@@ -92,19 +97,16 @@ def vcvars64() -> Dict[str, str]:
     return new
 
 
-def get_env() -> Dict[str, str]:
+def get_env(env) -> Dict[str, str]:
     if platform.system() != "Windows":
         return {}
 
     # for luarocks detect vc
-    return {
-        k: v
-        for k, v in vcvars64().items()
-        if k
-        in (
-            "VCINSTALLDIR",
-            "PATH",
-            "INCLUDE",
-            "LIB",
-        )
-    }
+    filter = (
+        "VCINSTALLDIR",
+        "PATH",
+        "INCLUDE",
+        "LIB",
+        "LIBPATH",
+    )
+    return {k: v for k, v in vcvars64(env).items() if (k in filter)}

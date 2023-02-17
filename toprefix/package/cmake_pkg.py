@@ -4,7 +4,7 @@ import shutil
 import logging
 from . import pkg
 from .source import Source
-
+from ..envman import EnvMan
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,9 +49,7 @@ class CMakePkg(pkg.Pkg):
         with pkg.pushd(source_dir):
             pkg.run(f"cmake --install build", env=pkg.make_env(prefix))
 
-    def process(
-        self, *, src: pathlib.Path, prefix: pathlib.Path, clean: bool, reconfigure: bool
-    ):
+    def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):
         LOGGER.info(f"install: {self}")
         extract = self.source.extract(src)
         assert extract

@@ -3,7 +3,7 @@ from typing import List
 from .source import Source
 import pathlib
 import logging
-import shutil
+from ..envman import EnvMan
 
 
 LOGGER = logging.getLogger(__name__)
@@ -14,16 +14,11 @@ class CustomPkg(pkg.Pkg):
         self.source = source
         self.commands = commands
 
-    def process(
-        self, *, src: pathlib.Path, prefix: pathlib.Path, clean: bool, reconfigure: bool
-    ):
-        extract = self.source.extract(src)
+    def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):
+        extract = self.source.extract(env.PREFIX_SRC)
         assert extract
 
-        LOGGER.info(f"custom: {extract} => {prefix}")
+        LOGGER.info(f"custom: {extract} => {env.PREFIX}")
         with pkg.pushd(extract):
             for command in self.commands:
-                pkg.run(
-                    command.format(PREFIX=prefix),
-                    env=pkg.make_env(prefix),
-                )
+                env.run(command)

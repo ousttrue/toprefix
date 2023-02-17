@@ -4,12 +4,13 @@ import logging
 import shutil
 from . import pkg
 from .source import Source
+from ..envman import EnvMan
 
 LOGGER = logging.getLogger(__name__)
 
 
 class MesonPkg(pkg.Pkg):
-    def __init__(self, source: Source, *, args: str = ''):
+    def __init__(self, source: Source, *, args: str = ""):
         self.source = source
         self.args = args
 
@@ -34,7 +35,8 @@ class MesonPkg(pkg.Pkg):
                 if clean:
                     shutil.rmtree(source_dir / "build")
                     pkg.run(
-                        f"meson setup build --prefix {prefix} {self.args}", env=pkg.make_env(prefix)
+                        f"meson setup build --prefix {prefix} {self.args}",
+                        env=pkg.make_env(prefix),
                     )
                 elif reconfigure:
                     pkg.run(
@@ -52,9 +54,7 @@ class MesonPkg(pkg.Pkg):
         with pkg.pushd(source_dir):
             pkg.run(f"meson install -C build", env=pkg.make_env(prefix))
 
-    def process(
-        self, *, src: pathlib.Path, prefix: pathlib.Path, clean: bool, reconfigure: bool
-    ):
+    def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):
         LOGGER.info(f"install: {self}")
         extract = self.source.extract(src)
         assert extract
