@@ -1,5 +1,5 @@
 from . import pkg
-from .source import Source
+from ..source import Source
 import pathlib
 import logging
 from ..envman import EnvMan
@@ -24,7 +24,7 @@ class AutoToolsPkg(pkg.Pkg):
         reconfigure: bool,
     ):
         LOGGER.info(f"configure: {source_dir} => {prefix}")
-        with pkg.pushd(source_dir):
+        with util.pushd(source_dir):
             if clean and (source_dir / "Makefile").exists():
                 pkg.run(
                     f"make distclean",
@@ -38,12 +38,12 @@ class AutoToolsPkg(pkg.Pkg):
 
     def build(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         LOGGER.info(f"build: {source_dir} => {prefix}")
-        with pkg.pushd(source_dir):
+        with util.pushd(source_dir):
             pkg.run(f"make", env=pkg.make_env(prefix))
 
     def install(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         LOGGER.info(f"install: {source_dir} => {prefix}")
-        with pkg.pushd(source_dir):
+        with util.pushd(source_dir):
             pkg.run(f"make install", env=pkg.make_env(prefix))
 
     def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):

@@ -1,9 +1,10 @@
 from . import pkg
 from typing import List
-from .source import Source
+from ..source import Source
 import pathlib
 import logging
 from ..envman import EnvMan
+from .. import util
 
 
 LOGGER = logging.getLogger(__name__)
@@ -19,6 +20,6 @@ class CustomPkg(pkg.Pkg):
         assert extract
 
         LOGGER.info(f"custom: {extract} => {env.PREFIX}")
-        with pkg.pushd(extract):
+        with util.pushd(extract):
             for command in self.commands:
                 env.run(command)

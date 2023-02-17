@@ -1,6 +1,12 @@
+from typing import List, Tuple
+import logging
+import pathlib
 from .source import Source
 from .archive import Archive
 from .gitrepository import GitRepository
+from .. import util
+
+LOGGER = logging.getLogger(__name__)
 
 __all__ = ["Source", "Archive", "GitRepository"]
 
@@ -31,3 +37,16 @@ def get_source(name: str, item: dict) -> Source:
                 raise NotImplementedError()
         case _:
             raise NotImplementedError()
+
+
+def archive_ext(src: str) -> Tuple[str, str]:
+    if src.endswith(".tar.xz"):
+        return src[0:-7], ".tar.xz"
+    elif src.endswith(".tar.gz"):
+        return src[0:-7], ".tar.gz"
+    elif src.endswith(".tar.bz2"):
+        return src[0:-8], ".tar.bz2"
+    elif src.endswith(".zip"):
+        return src[0:-4], ".zip"
+    else:
+        raise NotImplementedError(src)

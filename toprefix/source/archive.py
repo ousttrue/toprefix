@@ -46,6 +46,7 @@ class Archive(Source):
         if not archive_name:
             archive_name = os.path.basename(self.url)
         self.archive_name = archive_name
+        self.patches = []
 
     def __str__(self) -> str:
         return f"{self.name}-{self.version}"
@@ -56,7 +57,7 @@ class Archive(Source):
         stem, _ = archive_ext(basename)
 
         # {stem}-{version}{extension}
-        m = re.match(r"^(.*)-(\d+)\.(\d+)(\.\d+)?$", stem)
+        m = re.match(r"^(.*)-v?(\d+)\.(\d+)(\.\d+)?$", stem)
         if m:
             name = m.group(1)
             major = m.group(2)
@@ -89,19 +90,6 @@ class Archive(Source):
         m = re.search(r"/releases/download/([^/]+)/ghq_linux_amd64\.zip$", url)
         if m:
             name = "ghq"
-            version = m.group(1)
-            return Archive(
-                name,
-                version,
-                url,
-            )
-
-        # releases/download/llvmorg-15.0.6/llvm-15.0.6.src.tar.xz
-        m = re.search(
-            r"/releases/download/[^/]+/llvm-project-(\d+\.\d+\.\d+)\.src\.tar\.xz$", url
-        )
-        if m:
-            name = "llvm"
             version = m.group(1)
             return Archive(
                 name,
@@ -184,10 +172,12 @@ class Archive(Source):
                     # move to dst
                     shutil.move(items[0], extract)
 
-            print(os.path.exists(dname))  # False
+            assert not os.path.exists(dname)
 
             # LOGGER.info(f"extract: {extract}")
             # self.do_extract(download, extract)
+
+        util.do_patch(extract, self.patches)
 
         return extract
 

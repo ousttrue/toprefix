@@ -1,4 +1,4 @@
-from typing import Protocol, Optional
+from typing import Protocol, Optional, List
 import contextlib
 import pathlib
 import logging
@@ -26,10 +26,8 @@ def run(cmd: str, env: Optional[dict]):
     subprocess.run(cmd, env=env, shell=True, check=True)
 
 
-class Pkg(Protocol):
-    source: Source
-
-    def process(
-        self, *, src: pathlib.Path, prefix: pathlib.Path, clean: bool, reconfigure: bool
-    ):
-        ...
+def do_patch(dst: pathlib.Path, patches: List[pathlib.Path]):
+    for patch in patches:
+        LOGGER.info(f"apply: {patch}")
+        with pushd(dst):
+            run(f"patch -p0 < {patch}", None)

@@ -3,7 +3,7 @@ import pathlib
 import shutil
 import logging
 from . import pkg
-from .source import Source
+from ..source import Source
 from ..envman import EnvMan
 
 LOGGER = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class CMakePkg(pkg.Pkg):
         reconfigure: bool,
     ):
         LOGGER.info(f"configure: {source_dir} => {prefix}")
-        with pkg.pushd(source_dir):
+        with util.pushd(source_dir):
             if clean:
                 if (source_dir / "build").exists():
                     shutil.rmtree(source_dir / "build")
@@ -41,12 +41,12 @@ class CMakePkg(pkg.Pkg):
 
     def build(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         LOGGER.info(f"build: {source_dir} => {prefix}")
-        with pkg.pushd(source_dir):
+        with util.pushd(source_dir):
             pkg.run(f"cmake --build build", env=pkg.make_env(prefix))
 
     def install(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         LOGGER.info(f"install: {source_dir} => {prefix}")
-        with pkg.pushd(source_dir):
+        with util.pushd(source_dir):
             pkg.run(f"cmake --install build", env=pkg.make_env(prefix))
 
     def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):

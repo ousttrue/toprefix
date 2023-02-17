@@ -14,6 +14,7 @@ class GitRepository(Source):
     def __init__(self, name: str, url: str) -> None:
         self.name = name
         self.url = url
+        self.patches = []
 
     def __str__(self) -> str:
         return f"{self.name}: {self.url}"
@@ -34,7 +35,7 @@ class GitRepository(Source):
 
     def do_clone(self, url: str, dst: pathlib.Path):
         dst.parent.mkdir(parents=True, exist_ok=True)
-        with pkg.pushd(dst.parent):
+        with util.pushd(dst.parent):
             pkg.run(f"git clone {url}", None)
 
     def extract(self, src_dir: pathlib.Path):
@@ -42,4 +43,7 @@ class GitRepository(Source):
         if not clone.exists():
             LOGGER.info(f"clone: {clone}")
             self.do_clone(self.url, clone)
+
+        do_patch(clone, self.patches)
+
         return clone

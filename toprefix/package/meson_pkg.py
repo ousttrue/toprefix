@@ -3,7 +3,7 @@ import pathlib
 import logging
 import shutil
 from . import pkg
-from .source import Source
+from ..source import Source
 from ..envman import EnvMan
 
 LOGGER = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class MesonPkg(pkg.Pkg):
         reconfigure: bool,
     ):
         LOGGER.info(f"configure: {source_dir} => {prefix}")
-        with pkg.pushd(source_dir):
+        with util.pushd(source_dir):
             if not (source_dir / "build").exists():
                 pkg.run(
                     f"meson setup build --prefix {prefix}", env=pkg.make_env(prefix)
@@ -46,12 +46,12 @@ class MesonPkg(pkg.Pkg):
 
     def build(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         LOGGER.info(f"build: {source_dir} => {prefix}")
-        with pkg.pushd(source_dir):
+        with util.pushd(source_dir):
             pkg.run(f"meson compile -C build", env=pkg.make_env(prefix))
 
     def install(self, source_dir: pathlib.Path, prefix: pathlib.Path):
         LOGGER.info(f"install: {source_dir} => {prefix}")
-        with pkg.pushd(source_dir):
+        with util.pushd(source_dir):
             pkg.run(f"meson install -C build", env=pkg.make_env(prefix))
 
     def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):

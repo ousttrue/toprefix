@@ -1,5 +1,5 @@
 from .pkg import Pkg
-from .source import Source
+from ..source import Source
 import pathlib
 import logging
 from ..envman import EnvMan
