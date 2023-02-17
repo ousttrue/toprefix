@@ -161,9 +161,9 @@ source.github.tag = "nightly"
 custom = '''
 cmake -S cmake.deps -B .deps -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build .deps
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX={PREFIX}
 cmake --build build
-cmake --install --prefix {PREFIX}
+cmake --install build
 '''
 
 # [doxygen]

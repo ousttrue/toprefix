@@ -116,9 +116,10 @@ class EnvMan:
             env[k] = os.environ[k]
 
         env.update(vcenv.get_env(env))
+        cmd = cmd.format(PREFIX=self.PREFIX)
         LOGGER.debug(cmd)
         LOGGER.debug(env.keys())
-        subprocess.run(cmd.format(PREFIX=self.PREFIX), env=env, shell=True, check=True)
+        subprocess.run(cmd, env=env, shell=True, check=True)
 
     # def make_env(prefix: pathlib.Path) -> dict:
     #     return None
