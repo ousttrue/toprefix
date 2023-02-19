@@ -67,19 +67,6 @@ pkg.meson.args = '-Dbestline=disabled'
 source.url = "https://github.com/harfbuzz/harfbuzz/releases/download/5.3.1/harfbuzz-5.3.1.tar.xz"
 pkg.meson = {}
 
-[go]
-source.url = "https://go.dev/dl/go1.19.3.linux-amd64.tar.gz"
-pkg.prebuilt = {}
-
-[fzf]
-source.github.user = "junegunn"
-source.github.tag = "0.35.1"
-pkg.prebuilt = {}
-
-[ghq]
-source.url = "https://github.com/x-motemen/ghq/releases/download/v1.3.0/ghq_linux_amd64.zip"
-pkg.prebuilt = {}
-
 [tigervnc]
 source.github.user = "TigerVNC"
 source.github.tag = "v1.12.0"
@@ -110,11 +97,6 @@ pkg.meson = {}
 source.github.user = "FreeRDP"
 source.github.tag = "2.3.0"
 pkg.cmake = {}
-
-[xrdp]
-source.github.user = "neutrinolabs"
-source.github.tag = "v0.9.20"
-pkg.prebuilt = {}
 
 [KasmVNC]
 source.github.user = "kasmtech"
@@ -153,10 +135,6 @@ pkg.autotools = {}
 source.url = "https://gitlab.gnome.org/raggesilver/blackbox/-/archive/v0.12.2/blackbox-v0.12.2.tar.bz2"
 pkg.meson = {}
 
-# [doxygen]
-# source.url = "https://github.com/doxygen/doxygen/releases/download/Release_1_9_6/doxygen-1.9.6.windows.x64.bin.zip"
-# pkg.prebuilt = {}
-
 [libiconv]
 source.url = "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz"
 pkg.cmake = {}
@@ -175,3 +153,9 @@ pkg.cmake.args = "-DBUILD_SHARED_LIBS=ON"
 source.github.user = "libexpat"
 source.github.tag = "R_2_5_0"
 pkg.cmake.cmake_source = "expat"
+
+[mediapipe]
+source.github.user = "google"
+source.github.tag = "v0.9.1"
+pkg.bazel = {}
+

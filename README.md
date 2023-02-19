@@ -6,7 +6,7 @@ Build to local directory.
 
 ## install order
 
-- glib2
+- glib
 - gstreamer
 - gtk
 

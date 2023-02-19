@@ -7,6 +7,7 @@ from .package import (
     AutoToolsPkg,
     PrebuiltPkg,
     CustomPkg,
+    BazelPkg,
 )
 from .source import Source, Archive, GitRepository
 import pkgutil
@@ -27,6 +28,8 @@ def make_pkg(pkg: str, source: Source) -> Pkg:
             return MakePkg(source, **make)
         case {"autotools": autotools}:
             return AutoToolsPkg(source)
+        case {"bazel": bazel}:
+            return BazelPkg(source)
         case {"prebuilt": prebuilt}:
             return PrebuiltPkg(source)
         case {"custom": commands}:

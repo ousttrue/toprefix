@@ -16,7 +16,7 @@ class PrebuiltPkg(Pkg):
 
     def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):
         LOGGER.info(f"install: {self}")
-        extract = self.source.extract(src)
+        extract = self.source.extract(env)
         assert extract
 
         # patch

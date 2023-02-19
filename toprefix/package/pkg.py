@@ -9,7 +9,7 @@ LOGGER = logging.getLogger(__name__)
 class Pkg(Protocol):
     source: Source
 
-    def process(self, *, env=EnvMan, clean: bool, reconfigure: bool):
+    def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):
         ...
 
 # class Pkg(Protocol):

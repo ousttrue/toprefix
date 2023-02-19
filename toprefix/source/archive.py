@@ -87,6 +87,28 @@ class Archive(Source):
                 url,
             )
 
+        m = re.search(r"^(\w+)-(\d+)\.(\d+)\.(\d+)-pre\.(\d+)\.(\d+)-windows-x86_64$", stem)
+        if m:
+            name = m.group(1)
+            major = m.group(2)
+            minor = m.group(3)
+            patch = m.group(4)
+            if not patch:
+                patch = ""
+            return Archive(
+                name,
+                f"{major}.{minor}.{patch}",
+                url,
+            )
+
+        # nvim-win64.zip
+        if stem=='nvim-win64':
+            return Archive(
+                'nvim-prebuilt',
+                'nightly',
+                url,
+            )
+
         # releases/download/v1.3.0/ghq_linux_amd64.zip
         m = re.search(r"/releases/download/([^/]+)/ghq_linux_amd64\.zip$", url)
         if m:
@@ -98,7 +120,7 @@ class Archive(Source):
                 url,
             )
 
-        raise NotImplementedError(stem)
+        raise NotImplementedError(basename)
 
     @staticmethod
     def gnome(name: str, version: str) -> "Archive":
