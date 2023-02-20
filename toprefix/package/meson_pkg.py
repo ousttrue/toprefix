@@ -1,4 +1,3 @@
-from typing import Optional
 import pathlib
 import logging
 import shutil
@@ -25,32 +24,28 @@ class MesonPkg(Pkg):
         clean: bool,
         reconfigure: bool,
     ):
-        LOGGER.info(f"configure: {source_dir} => {env.PREFIX_SRC}")
+        LOGGER.info(f"configure: {source_dir} => {env.PREFIX}")
         with env.pushd(source_dir):
             if not (source_dir / "build").exists():
-                env.run( f"meson setup build --prefix {env.PREFIX_SRC}")
+                env.run(f"meson setup build --prefix {env.PREFIX}")
             else:
                 if clean:
                     shutil.rmtree(source_dir / "build")
-                    env.run(
-                        f"meson setup build --prefix {env.PREFIX_SRC} {self.args}",
-                        env=pkg.make_env(env.PREFIX_SRC),
-                    )
+                    env.run(f"meson setup build --prefix {env.PREFIX} {self.args}")
                 elif reconfigure:
                     env.run(
-                        f"meson setup build --prefix {env.PREFIX_SRC} {self.args} --reconfigure",
-                        env=pkg.make_env(env.PREFIX_SRC),
+                        f"meson setup build --prefix {env.PREFIX} {self.args} --reconfigure"
                     )
 
-    def build(self, source_dir: pathlib.Path, prefix: pathlib.Path):
-        LOGGER.info(f"build: {source_dir} => {prefix}")
+    def build(self, source_dir: pathlib.Path, env: EnvMan):
+        LOGGER.info(f"build: {source_dir} => {env.PREFIX}")
         with env.pushd(source_dir):
-            env.run(f"meson compile -C build", env=pkg.make_env(prefix))
+            env.run(f"meson compile -C build")
 
-    def install(self, source_dir: pathlib.Path, prefix: pathlib.Path):
-        LOGGER.info(f"install: {source_dir} => {prefix}")
+    def install(self, source_dir: pathlib.Path, env: EnvMan):
+        LOGGER.info(f"install: {source_dir} => {env.PREFIX}")
         with env.pushd(source_dir):
-            env.run(f"meson install -C build", env=pkg.make_env(prefix))
+            env.run(f"meson install -C build")
 
     def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):
         LOGGER.info(f"install: {self}")
@@ -61,5 +56,5 @@ class MesonPkg(Pkg):
 
         # build
         self.configure(extract, env, clean=clean, reconfigure=reconfigure)
-        self.build(extract, env.PREFIX_SRC)
-        self.install(extract, env.PREFIX_SRC)
+        self.build(extract, env)
+        self.install(extract, env)

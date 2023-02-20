@@ -5,7 +5,7 @@ from .make_pkg import MakePkg
 from .autotools_pkg import AutoToolsPkg
 from .prebuilt_pkg import PrebuiltPkg
 from .custom_pkg import CustomPkg
-from .bazel_pkg import BazelPkg
+# from .bazel_pkg import BazelPkg
 
 __all__ = [
     "Pkg",
@@ -15,5 +15,5 @@ __all__ = [
     "AutoToolsPkg",
     "PrebuiltPkg",
     "CustomPkg",
-    "BazelPkg",
+    # "BazelPkg",
 ]

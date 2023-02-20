@@ -154,8 +154,8 @@ source.github.user = "libexpat"
 source.github.tag = "R_2_5_0"
 pkg.cmake.cmake_source = "expat"
 
-[mediapipe]
-source.github.user = "google"
-source.github.tag = "v0.9.1"
-pkg.bazel = {}
+# [mediapipe]
+# source.github.user = "google"
+# source.github.tag = "v0.9.1"
+# pkg.bazel = {}
 
