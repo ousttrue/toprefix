@@ -2,7 +2,7 @@ import argparse
 import logging
 from . import package
 from . import _version
-from .envman import EnvMan
+from . import runenv
 import colorama
 from colorama import Fore
 
@@ -33,6 +33,7 @@ def main():
 
     args = parser.parse_args()
 
+    package.init_pkgs()
     match args.subparser_name:
         case "version":
             print(_version.version)
@@ -47,15 +48,13 @@ def main():
                 print(f"{args.package} {Fore.RED}not found{Fore.RESET}")
                 return
             pkg.process(
-                env=EnvMan(),
                 clean=args.clean,
                 reconfigure=args.reconfigure,
             )
 
         case _:
             parser.print_help()
-            env = EnvMan()
-            env.print()
+            runenv.print_env()
 
 
 if __name__ == "__main__":

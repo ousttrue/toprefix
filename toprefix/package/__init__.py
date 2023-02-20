@@ -2,6 +2,7 @@ from typing import List, Iterable, Optional
 import pathlib
 import toml
 from ..source import Source, Archive, GitRepository
+from .. import runenv
 from .pkg import Pkg
 from .meson_pkg import MesonPkg
 from .cmake_pkg import CMakePkg
@@ -86,18 +87,19 @@ def generate_pkgs(parsed):
     for k, v in parsed.items():
         source = get_source(k, v)
 
-        for patch in iter_patch(f.parent, v):
-            source.patches.append(patch)
+        # for patch in iter_patch(f.parent, v):
+        #     source.patches.append(patch)
 
         yield make_pkg(v["pkg"], source)
 
 
-for f in HERE.glob("assets/**/*.toml"):
-    if f.is_file and f.suffix == ".toml":
-        data = f.read_text(encoding="utf-8")
-        parsed = toml.loads(data)
-        for pkg in generate_pkgs(parsed):
-            PKGS.append(pkg)
+def init_pkgs():
+    for f in HERE.parent.glob("assets/**/*.toml"):
+        if f.is_file and f.suffix == ".toml":
+            data = f.read_text(encoding="utf-8")
+            parsed = toml.loads(data)
+            for pkg in generate_pkgs(parsed):
+                PKGS.append(pkg)
 
 
 def list_pkgs():

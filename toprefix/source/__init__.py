@@ -1,10 +1,9 @@
-from typing import List, Tuple
+from typing import Tuple
 import logging
-import pathlib
 from .source import Source
 from .archive import Archive
 from .gitrepository import GitRepository
-from .. import util
+from .. import runenv
 
 LOGGER = logging.getLogger(__name__)
 

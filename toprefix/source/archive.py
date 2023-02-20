@@ -7,9 +7,8 @@ import shutil
 import re
 import tqdm
 import tempfile
-from ..envman import EnvMan
+from .. import runenv
 from .source import Source
-from toprefix import util
 
 
 def archive_ext(src: str) -> Tuple[str, str]:
@@ -39,7 +38,11 @@ VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)(?:\.(\d+))?$")
 
 class Archive(Source):
     def __init__(
-        self, name: str, version: str, url: str, archive_name: Optional[str] = None
+        self,
+        name: str,
+        version: str,
+        url: str,
+        archive_name: Optional[str] = None,
     ) -> None:
         self.name = name
         self.version = version
@@ -87,7 +90,9 @@ class Archive(Source):
                 url,
             )
 
-        m = re.search(r"^(\w+)-(\d+)\.(\d+)\.(\d+)-pre\.(\d+)\.(\d+)-windows-x86_64$", stem)
+        m = re.search(
+            r"^(\w+)-(\d+)\.(\d+)\.(\d+)-pre\.(\d+)\.(\d+)-windows-x86_64$", stem
+        )
         if m:
             name = m.group(1)
             major = m.group(2)
@@ -102,10 +107,10 @@ class Archive(Source):
             )
 
         # nvim-win64.zip
-        if stem=='nvim-win64':
+        if stem == "nvim-win64":
             return Archive(
-                'nvim-prebuilt',
-                'nightly',
+                "nvim-prebuilt",
+                "nightly",
                 url,
             )
 
@@ -132,7 +137,7 @@ class Archive(Source):
                 major=m.group(1),
                 minor=m.group(2),
                 patch=m.group(3),
-            )
+            ),
         )
 
     @staticmethod
@@ -171,8 +176,8 @@ class Archive(Source):
             archive_name=f"{name}-{tag}.tar.gz",
         )
 
-    def extract(self, env: EnvMan) -> Optional[pathlib.Path]:
-        download = env.PREFIX_SRC / self.archive_name
+    def extract(self) -> Optional[pathlib.Path]:
+        download = runenv.PREFIX_SRC / self.archive_name
         if download.exists():
             LOGGER.info(f"exists: {download}")
         else:
@@ -180,11 +185,11 @@ class Archive(Source):
             self.do_download(self.url, download)
 
         stem, _ = archive_ext(self.archive_name)
-        extract = env.PREFIX_SRC / stem
+        extract = runenv.PREFIX_SRC / stem
         if not extract.exists():
             with tempfile.TemporaryDirectory() as dname:
                 dst = pathlib.Path(dname)
-                with env.pushd(dst):
+                with runenv.pushd(dst):
                     shutil.unpack_archive(download)
 
                     # check result
@@ -200,7 +205,7 @@ class Archive(Source):
             # LOGGER.info(f"extract: {extract}")
             # self.do_extract(download, extract)
 
-        env.do_patch(extract, self.patches)
+        runenv.do_patch(extract, self.patches)
 
         return extract
 

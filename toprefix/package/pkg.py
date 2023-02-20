@@ -1,7 +1,6 @@
 from typing import Protocol
 import logging
 from ..source import Source
-from ..envman import EnvMan
 
 LOGGER = logging.getLogger(__name__)
 
@@ -9,8 +8,9 @@ LOGGER = logging.getLogger(__name__)
 class Pkg(Protocol):
     source: Source
 
-    def process(self, *, env: EnvMan, clean: bool, reconfigure: bool):
+    def process(self, *, clean: bool, reconfigure: bool):
         ...
+
 
 # class Pkg(Protocol):
 #     source: Source
