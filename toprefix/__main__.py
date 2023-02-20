@@ -1,6 +1,6 @@
 import argparse
 import logging
-from . import packages
+from . import package
 from . import _version
 from .envman import EnvMan
 import colorama
@@ -39,10 +39,10 @@ def main():
 
         case "list":
             LOGGER.info("list")
-            packages.list_pkgs()
+            package.list_pkgs()
 
         case "install":
-            pkg = packages.get_pkg(args.package)
+            pkg = package.get_pkg(args.package)
             if not pkg:
                 print(f"{args.package} {Fore.RED}not found{Fore.RESET}")
                 return

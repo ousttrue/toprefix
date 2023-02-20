@@ -1,0 +1,30 @@
+[go]
+source.url = "https://go.dev/dl/go1.19.3.linux-amd64.tar.gz"
+pkg.prebuilt = {}
+
+[fzf]
+source.github.user = "junegunn"
+source.github.tag = "0.35.1"
+pkg.prebuilt = {}
+
+[ghq]
+source.url = "https://github.com/x-motemen/ghq/releases/download/v1.3.0/ghq_linux_amd64.zip"
+pkg.prebuilt = {}
+
+[bazel]
+source.url = "https://github.com/bazelbuild/bazel/releases/download/7.0.0-pre.20230209.2/bazel-7.0.0-pre.20230209.2-windows-x86_64.zip"
+pkg.prebuilt = {}
+
+[xrdp]
+source.github.user = "neutrinolabs"
+source.github.tag = "v0.9.20"
+pkg.prebuilt = {}
+
+# [doxygen]
+# source.url = "https://github.com/doxygen/doxygen/releases/download/Release_1_9_6/doxygen-1.9.6.windows.x64.bin.zip"
+# pkg.prebuilt = {}
+
+[nvim-prebuilt]
+source.url = "https://github.com/neovim/neovim/releases/download/nightly/nvim-win64.zip"
+pkg.prebuilt = {}
+
