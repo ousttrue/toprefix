@@ -23,39 +23,38 @@ class CMakePkg(pkg.Pkg):
     def configure(
         self,
         source_dir: pathlib.Path,
-        prefix: pathlib.Path,
         *,
         clean: bool,
         reconfigure: bool,
     ):
-        LOGGER.info(f"configure: {source_dir} => {prefix}")
+        LOGGER.info(f"configure: {source_dir} => {runenv.PREFIX}")
         with runenv.pushd(source_dir):
             if clean:
                 if (source_dir / "build").exists():
                     shutil.rmtree(source_dir / "build")
 
             runenv.run(
-                f"cmake -S {self.cmake_source} -B build -G Ninja -DCMAKE_INSTALL_PREFIX={prefix} -DCMAKE_BUILD_TYPE=Release {self.args}"
+                f"cmake -S {self.cmake_source} -B build -G Ninja -DCMAKE_INSTALL_PREFIX={runenv.PREFIX} -DCMAKE_BUILD_TYPE=Release {self.args}"
             )
 
-    def build(self, source_dir: pathlib.Path, prefix: pathlib.Path):
-        LOGGER.info(f"build: {source_dir} => {prefix}")
+    def build(self, source_dir: pathlib.Path):
+        LOGGER.info(f"build: {source_dir} => {runenv.PREFIX}")
         with runenv.pushd(source_dir):
             runenv.run(f"cmake --build build")
 
-    def install(self, source_dir: pathlib.Path, prefix: pathlib.Path):
-        LOGGER.info(f"install: {source_dir} => {prefix}")
-        with util.pushd(source_dir):
-            pkg.run(f"cmake --install build", env=pkg.make_env(prefix))
+    def install(self, source_dir: pathlib.Path):
+        LOGGER.info(f"install: {source_dir} => {runenv.PREFIX}")
+        with runenv.pushd(source_dir):
+            runenv.run(f"cmake --install build")
 
     def process(self, *, clean: bool, reconfigure: bool):
         LOGGER.info(f"install: {self}")
-        extract = self.source.extract(src)
+        extract = self.source.extract()
         assert extract
 
         # patch
 
         # build
-        self.configure(extract, prefix, clean=clean, reconfigure=reconfigure)
-        self.build(extract, prefix)
-        self.install(extract, prefix)
+        self.configure(extract, clean=clean, reconfigure=reconfigure)
+        self.build(extract)
+        self.install(extract)
