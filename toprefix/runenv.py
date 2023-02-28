@@ -30,30 +30,38 @@ def minimum_env():
         raise Exception("git required")
     env = {}
     path: List[str] = [
-        os.environ["SystemRoot"] + "\\System32",
-        os.environ["SystemRoot"] + "\\System32\\WindowsPowerShell\\v1.0",
         str(git.parent),
     ]
+    if platform.system() == "Windows":
+        path.append(os.environ["SystemRoot"] + "\\System32")
+        path.append(os.environ["SystemRoot"] + "\\System32\\WindowsPowerShell\\v1.0")
     env["PATH"] = ";".join(path)
-    for k in (
-        "SystemRoot",
-        "APPDATA",
-        "LOCALAPPDATA",
-        "ComSpec",
-        "OS",
-        "NUMBER_OF_PROCESSORS",
-        "PROCESSOR_ARCHITECTURE",
-        "PROCESSOR_IDENTIFIER",
-        "PROCESSOR_LEVEL",
-        "PROCESSOR_REVISION",
-        "POWERSHELL_DISTRIBUTION_CHANNEL",
-        "PSModulePath",
-        "TEMP",
-        "TMP",
-        "USERNAME",
-        "USERPROFILE",
-    ):
-        env[k] = os.environ[k]
+    if platform.system() == "Windows":
+        for k in (
+            "SystemRoot",
+            "APPDATA",
+            "LOCALAPPDATA",
+            "ComSpec",
+            "OS",
+            "NUMBER_OF_PROCESSORS",
+            "PROCESSOR_ARCHITECTURE",
+            "PROCESSOR_IDENTIFIER",
+            "PROCESSOR_LEVEL",
+            "PROCESSOR_REVISION",
+            "POWERSHELL_DISTRIBUTION_CHANNEL",
+            "PSModulePath",
+            "TEMP",
+            "TMP",
+            "USERNAME",
+            "USERPROFILE",
+        ):
+            env[k] = os.environ[k]
+    else:
+        for k in (
+            "HOME",
+            "USER",
+        ):
+            env[k] = os.environ[k]
     return env
 
 

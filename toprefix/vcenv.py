@@ -6,7 +6,6 @@ import pathlib
 import json
 import vswhere
 
-KITS = pathlib.Path(f"{os.environ['LOCALAPPDATA']}/CMakeTools/cmake-tools-kits.json")
 
 
 # VCBARS64_2019 = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat'
@@ -14,6 +13,7 @@ KITS = pathlib.Path(f"{os.environ['LOCALAPPDATA']}/CMakeTools/cmake-tools-kits.j
 
 
 def select_x64_kit() -> Optional[dict]:
+    KITS = pathlib.Path(f"{os.environ['LOCALAPPDATA']}/CMakeTools/cmake-tools-kits.json")
     if KITS.exists():
         parsed = json.loads(KITS.read_text(encoding="utf-8"))
         for kit in parsed:
