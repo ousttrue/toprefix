@@ -4,7 +4,8 @@ import os
 import subprocess
 import pathlib
 import json
-import vswhere
+if platform.system()=='Windows':
+    import vswhere
 
 
 

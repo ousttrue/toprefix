@@ -27,7 +27,7 @@ dependencies = [
     "toml",
     "colorama",
     "colorlog",
-    "vswhere",
+    # "vswhere",
 ]
 dynamic = ["version"]
 
