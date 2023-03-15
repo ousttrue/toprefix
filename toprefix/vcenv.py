@@ -4,17 +4,26 @@ import os
 import subprocess
 import pathlib
 import json
-if platform.system()=='Windows':
+
+if platform.system() == "Windows":
     import vswhere
 
-
+KITS = (
+    pathlib.Path(f"{os.environ['LOCALAPPDATA']}/CMakeTools/cmake-tools-kits.json")
+    if platform.system() == "Windows"
+    else pathlib.Path(
+        f"{os.environ['HOME']}/.local/share/CMakeTools/cmake-tools-kits.json"
+    )
+)
 
 # VCBARS64_2019 = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat'
 # VCBARS64_2022 = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat"
 
 
 def select_x64_kit() -> Optional[dict]:
-    KITS = pathlib.Path(f"{os.environ['LOCALAPPDATA']}/CMakeTools/cmake-tools-kits.json")
+    KITS = pathlib.Path(
+        f"{os.environ['LOCALAPPDATA']}/CMakeTools/cmake-tools-kits.json"
+    )
     if KITS.exists():
         parsed = json.loads(KITS.read_text(encoding="utf-8"))
         for kit in parsed:
@@ -67,7 +76,7 @@ def vcvars64(env) -> Dict[str, str]:
     process = subprocess.Popen(
         [comspec, "/k", get_vcbars(), "&", "set", "&", "exit"],
         stdout=subprocess.PIPE,
-        env=env if env!=None else None,
+        env=env if env != None else None,
         shell=False,
     )
 

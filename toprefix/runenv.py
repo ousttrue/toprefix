@@ -35,8 +35,6 @@ def minimum_env():
     if platform.system() == "Windows":
         path.append(os.environ["SystemRoot"] + "\\System32")
         path.append(os.environ["SystemRoot"] + "\\System32\\WindowsPowerShell\\v1.0")
-    env["PATH"] = ";".join(path)
-    if platform.system() == "Windows":
         for k in (
             "SystemRoot",
             "APPDATA",
@@ -56,12 +54,21 @@ def minimum_env():
             "USERPROFILE",
         ):
             env[k] = os.environ[k]
+        env["PATH"] = ";".join(path)
     else:
+        path.append("/bin")
+        path.append("/usr/bin")
+        path.append("/sbin")
+        env["PATH"] = ":".join(path)
         for k in (
             "HOME",
+            "LANG",
             "USER",
+            "SHELL",
+            "HOSTTYPE",
         ):
             env[k] = os.environ[k]
+
     return env
 
 
