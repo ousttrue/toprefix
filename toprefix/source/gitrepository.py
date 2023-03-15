@@ -39,7 +39,7 @@ class GitRepository(Source):
             runenv.run(f"git clone {url}")
 
     def extract(self):
-        clone = runenv.PREFIX_SRC / self.name
+        clone = runenv.LOCAL_SRC / self.name
         if not clone.exists():
             LOGGER.info(f"clone: {clone}")
             self.do_clone(self.url, clone)

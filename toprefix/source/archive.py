@@ -9,6 +9,7 @@ import tqdm
 import tempfile
 from .. import runenv
 from .source import Source
+from . import name_version
 
 
 def archive_ext(src: str) -> Tuple[str, str]:
@@ -42,6 +43,7 @@ class Archive(Source):
         name: str,
         version: str,
         url: str,
+        # folder name to extract other than filename
         archive_name: Optional[str] = None,
     ) -> None:
         self.name = name
@@ -56,76 +58,28 @@ class Archive(Source):
         return f"{self.name}-{self.version}"
 
     @staticmethod
-    def from_url(url: str) -> "Archive":
+    def from_url(
+        url: str, *, name: Optional[str] = None, version: Optional[str] = None
+    ) -> "Archive":
         basename = os.path.basename(url)
         stem, _ = archive_ext(basename)
 
-        # {stem}-{version}{extension}
-        m = re.match(r"^(.*)-v?(\d+)\.(\d+)(\.\d+)?$", stem)
-        if m:
-            name = m.group(1)
-            major = m.group(2)
-            minor = m.group(3)
-            patch = m.group(4)
-            if not patch:
-                patch = ""
-            return Archive(
-                name,
-                f"{major}.{minor}{patch}",
-                url,
-            )
-
-        # go1.19.3.linux-amd64.tar.gz
-        m = re.match(r"^(.*)(\d+)\.(\d+)(\.\d+)\.linux-amd64$", stem)
-        if m:
-            name = m.group(1)
-            major = m.group(2)
-            minor = m.group(3)
-            patch = m.group(4)
-            if not patch:
-                patch = ""
-            return Archive(
-                name,
-                f"{major}.{minor}{patch}",
-                url,
-            )
-
-        m = re.search(
-            r"^(\w+)-(\d+)\.(\d+)\.(\d+)-pre\.(\d+)\.(\d+)-windows-x86_64$", stem
-        )
-        if m:
-            name = m.group(1)
-            major = m.group(2)
-            minor = m.group(3)
-            patch = m.group(4)
-            if not patch:
-                patch = ""
-            return Archive(
-                name,
-                f"{major}.{minor}.{patch}",
-                url,
-            )
-
-        # nvim-win64.zip
-        if stem == "nvim-win64":
-            return Archive(
-                "nvim-prebuilt",
-                "nightly",
-                url,
-            )
-
-        # releases/download/v1.3.0/ghq_linux_amd64.zip
-        m = re.search(r"/releases/download/([^/]+)/ghq_linux_amd64\.zip$", url)
-        if m:
-            name = "ghq"
-            version = m.group(1)
+        if name and version:
             return Archive(
                 name,
                 version,
                 url,
             )
 
-        raise NotImplementedError(basename)
+        match name_version.get_name_version(stem):
+            case (name, version):
+                return Archive(
+                    name,
+                    version,
+                    url,
+                )
+
+        raise NotImplementedError(basename, name, version)
 
     @staticmethod
     def gnome(name: str, version: str) -> "Archive":
@@ -177,7 +131,7 @@ class Archive(Source):
         )
 
     def extract(self) -> Optional[pathlib.Path]:
-        download = runenv.PREFIX_SRC / self.archive_name
+        download = runenv.LOCAL_SRC / self.archive_name
         if download.exists():
             LOGGER.info(f"exists: {download}")
         else:
@@ -185,7 +139,7 @@ class Archive(Source):
             self.do_download(self.url, download)
 
         stem, _ = archive_ext(self.archive_name)
-        extract = runenv.PREFIX_SRC / stem
+        extract = runenv.LOCAL_SRC / stem
         if not extract.exists():
             with tempfile.TemporaryDirectory() as dname:
                 dst = pathlib.Path(dname)

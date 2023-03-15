@@ -11,7 +11,8 @@ LOGGER = logging.getLogger(__name__)
 
 HOME = pathlib.Path(os.environ["HOME"])
 PREFIX = HOME / "prefix"
-PREFIX_SRC = HOME / "local/src"
+LOCAL_BIN = HOME / "local/bin"
+LOCAL_SRC = HOME / "local/src"
 EXE = ".exe" if platform.system() == "Windows" else ""
 
 CONFIG_TOML = HOME / ".config/toprefix/toprefix.toml"
@@ -144,6 +145,7 @@ def print_env():
     # https://kaworu.jpn.org/kaworu/2018-05-19-1.php
     print()
     print("environment:")
+    print(f"  TOOLS: {Fore.CYAN}{unexpand(LOCAL_BIN)}{Fore.RESET}")
     print(f"  PREFIX: {Fore.CYAN}{unexpand(PREFIX)}{Fore.RESET}")
     # PATH
     check_prefix_env_path("PATH", "bin")
@@ -181,7 +183,7 @@ def print_env():
                 f"lib/site-packages",
             )
 
-    print(f"  SRC: {Fore.CYAN}{unexpand(PREFIX_SRC)}{Fore.RESET}")
+    print(f"  SRC: {Fore.CYAN}{unexpand(LOCAL_SRC)}{Fore.RESET}")
     print()
 
     if platform.system() == "Windows":

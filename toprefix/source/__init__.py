@@ -7,13 +7,15 @@ from .. import runenv
 
 LOGGER = logging.getLogger(__name__)
 
-__all__ = ["Source", "Archive", "GitRepository"]
+__all__ = ["Source", "Archive", "GitRepository", "get_source"]
 
 
 def get_source(name: str, item: dict) -> Source:
     match item["source"]:
         case {"gnome": gnome}:
             return Archive.gnome(name, gnome["version"])
+        case {"url": url, "version": version}:
+            return Archive.from_url(url, name=name, version=version)
         case {"url": url}:
             return Archive.from_url(url)
         case {"github": repo}:
