@@ -7,13 +7,15 @@ import subprocess
 from colorama import Fore
 from . import vcenv
 
+IS_WINDOWS = platform.system() == "Windows"
+
 LOGGER = logging.getLogger(__name__)
 
-HOME = pathlib.Path(os.environ["HOME"])
+HOME = pathlib.Path(os.environ["USERPROFILE"] if IS_WINDOWS else os.environ["HOME"])
 PREFIX = HOME / "prefix"
 LOCAL_BIN = HOME / "local/bin"
 LOCAL_SRC = HOME / "local/src"
-EXE = ".exe" if platform.system() == "Windows" else ""
+EXE = ".exe" if IS_WINDOWS else ""
 
 CONFIG_TOML = HOME / ".config/toprefix/toprefix.toml"
 if CONFIG_TOML.exists():
@@ -33,7 +35,7 @@ def minimum_env():
     path: List[str] = [
         str(git.parent),
     ]
-    if platform.system() == "Windows":
+    if IS_WINDOWS:
         path.append(os.environ["SystemRoot"] + "\\System32")
         path.append(os.environ["SystemRoot"] + "\\System32\\WindowsPowerShell\\v1.0")
         for k in (
@@ -150,17 +152,17 @@ def print_env():
     # PATH
     check_prefix_env_path("PATH", "bin")
     # LD_LIBRARY_PATH
-    if platform.system() != "Windows":
+    if not IS_WINDOWS:
         check_prefix_env_path("LD_LIBRARY_PATH", "lib64")
     # PKG_CONFIG_PATH
-    if platform.system() != "Windows":
+    if not IS_WINDOWS:
         check_prefix_env_path("PKG_CONFIG_PATH", "lib64/pkgconfig")
         check_prefix_env_path("PKG_CONFIG_PATH", "share/pkgconfig")
     else:
         check_prefix_env_path("PKG_CONFIG_PATH", "lib/pkgconfig")
         check_prefix_env_path("PKG_CONFIG_PATH", "share/pkgconfig")
     # PYTHONPATH
-    if platform.system() != "Windows":
+    if not IS_WINDOWS:
         python_lib_path = (
             PREFIX
             / f"lib/python{sys.version_info.major}.{sys.version_info.minor}/site_packages"
@@ -172,7 +174,7 @@ def print_env():
         print(f"    {Fore.GREEN}sys.path has {python_lib_path}{Fore.RESET}")
     else:
         # print(sys.path)
-        if platform.system() != "Windows":
+        if not IS_WINDOWS:
             check_prefix_env_path(
                 "PYTHONPATH",
                 f"lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages",
@@ -186,7 +188,7 @@ def print_env():
     print(f"  SRC: {Fore.CYAN}{unexpand(LOCAL_SRC)}{Fore.RESET}")
     print()
 
-    if platform.system() == "Windows":
+    if IS_WINDOWS:
         print(f"vcenv: {Fore.CYAN}{vcenv.get_vcbars()}{Fore.RESET}")
         env = minimum_env()
         for k, v in vcenv.get_env(env).items():

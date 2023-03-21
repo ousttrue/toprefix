@@ -34,3 +34,8 @@ source.url = "https://ziglang.org/builds/zig-linux-x86_64-0.11.0-dev.1975+e17998
 source.version = '0.11.0-dev.1975'
 pkg.prebuilt.install.bin = 'zig'
 
+[zig-windows]
+source.url = "https://ziglang.org/builds/zig-windows-x86_64-0.11.0-dev.2196+bc0f24691.zip"
+source.version = '0.11.0-dev.2196'
+pkg.prebuilt.install.bin = 'zig.exe'
+
