@@ -30,7 +30,7 @@ source.version = 'win64'
 pkg.prebuilt = {}
 
 [zig-linux]
-source.url = "https://ziglang.org/builds/zig-linux-x86_64-0.11.0-dev.1975+e17998b39.tar.xz"
+source.url = "https://ziglang.org/builds/zig-linux-x86_64-0.11.0-dev.2336+5b82b4004.tar.xz"
 source.version = '0.11.0-dev.1975'
 pkg.prebuilt.install.bin = 'zig'
 
