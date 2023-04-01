@@ -68,7 +68,7 @@ def minimum_env():
             "LANG",
             "USER",
             "SHELL",
-            "HOSTTYPE",
+            # "HOSTTYPE",
         ):
             env[k] = os.environ[k]
 
